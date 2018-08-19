@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
-
 html {
   font-family: 'Open Sans', sans-serif;
 }
@@ -17,12 +16,11 @@ body {
 .wrap {
   width: 100%;
   height: 100vh;
-  background: url(../i/back.png) repeat,
-              radial-gradient(circle at top center, #707885, #252c36);
+  background: url(../i/back.png) repeat, radial-gradient(circle at top center, #707885, #252c36);
   text-align: center;
-  -ms-user-select: none; 
-  -moz-user-select: none; 
-  -webkit-user-select: none;   
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -66,7 +64,8 @@ body {
   background-color: #51606e;
 }
 
-.menu__icon, .menu__item-title {
+.menu__icon,
+.menu__item-title {
   display: inline-block;
   vertical-align: middle;
 }
@@ -109,7 +108,8 @@ body {
   background-color: #7b8c9c;
 }
 
-.burger-icon:before, .burger-icon:after {
+.burger-icon:before,
+.burger-icon:after {
   position: absolute;
   left: 0;
   content: '';
@@ -119,7 +119,9 @@ body {
   background-color: #7b8c9c;
 }
 
-.burger:hover .burger-icon, .burger:hover .burger-icon:before, .burger:hover .burger-icon:after {
+.burger:hover .burger-icon,
+.burger:hover .burger-icon:before,
+.burger:hover .burger-icon:after {
   background-color: #fff;
 }
 
@@ -160,7 +162,9 @@ body {
   background-position: -85px -1px;
 }
 
-.new:after, .draw:after, .comments:after {
+.new:after,
+.draw:after,
+.comments:after {
   content: '';
   position: absolute;
   right: -0.1rem;
@@ -172,32 +176,35 @@ body {
   z-index: 10;
 }
 
-.menu__item.new:hover > .new-icon {
+.menu__item.new:hover>.new-icon {
   background-position: -56px -31px;
 }
 
-.menu__item.comments:hover > .comments-icon {
+.menu__item.comments:hover>.comments-icon {
   background-position: -1px -28px;
 }
 
-.menu__item.draw:hover > .draw-icon {
+.menu__item.draw:hover>.draw-icon {
   background-position: -29px -27px;
 }
 
-.menu__item.share:hover > .share-icon {
+.menu__item.share:hover>.share-icon {
   background-position: -85px -25px;
 }
 
-
 /* ~~~~~~~~~~~~~~~~~~~~~~ панели инструментов ~~~~~~~~~~~~~~~~~~~~~ */
 
-.comments-tools, .draw-tools, .share-tools {
+.comments-tools,
+.draw-tools,
+.share-tools {
   border-left: 0.1rem solid #51606e;
   border-right: 0.1rem solid #51606e;
   cursor: initial;
 }
 
-.comments-tools:after, .draw-tools:after, .share-tools:after {
+.comments-tools:after,
+.draw-tools:after,
+.share-tools:after {
   content: url(../i/triangle.png);
   position: absolute;
   top: 2.6rem;
@@ -205,7 +212,11 @@ body {
   z-index: 10;
 }
 
-.menu__color, .menu__url, .menu_copy, .menu__toggle, .menu__toggle-bttn {
+.menu__color,
+.menu__url,
+.menu_copy,
+.menu__toggle,
+.menu__toggle-bttn {
   display: inline-block;
   vertical-align: middle;
 }
@@ -226,11 +237,11 @@ body {
   cursor: pointer;
 }
 
-.menu__color:nth-of-type(n + 2) {
+.menu__color:nth-of-type(n+2) {
   margin-left: -1rem;
 }
 
-.menu__color + span {
+.menu__color+span {
   position: relative;
   display: inline-block;
   vertical-align: middle;
@@ -244,32 +255,31 @@ body {
   z-index: 1;
 }
 
-.menu__color:checked + span {
+.menu__color:checked+span {
   border-radius: 1.2rem;
   border: 0.3rem solid #fff;
   cursor: pointer;
 }
 
-.menu__color.red + span {
+.menu__color.red+span {
   background-color: #eb5d56;
 }
 
-.menu__color.yellow + span {
+.menu__color.yellow+span {
   background-color: #f4d22f;
 }
 
-.menu__color.green + span {
+.menu__color.green+span {
   background-color: #6ebf44;
 }
 
-.menu__color.blue + span {
+.menu__color.blue+span {
   background-color: #52a7f7;
 }
 
-.menu__color.purple + span {
+.menu__color.purple+span {
   background-color: #b36ae0;
 }
-
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~ комментировать ~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -277,18 +287,21 @@ body {
   width: 24.2rem;
 }
 
-.menu__toggle-title, .menu__toggle-bg, .menu__toggle, .menu__toggle-bttn {
+.menu__toggle-title,
+.menu__toggle-bg,
+.menu__toggle,
+.menu__toggle-bttn {
   display: inline-block;
   vertical-align: middle;
 }
 
 .menu__toggle-title {
-    position: absolute;
-    top: -2.2rem;
-    font-size: 1.1rem;
-    color: #8192a2;
-    text-transform: none;
-    padding: 20px 0;
+  position: absolute;
+  top: -2.2rem;
+  font-size: 1.1rem;
+  color: #8192a2;
+  text-transform: none;
+  padding: 20px 0;
 }
 
 .menu__toggle-title_on {
@@ -364,15 +377,15 @@ body {
 .comments__form {
   position: absolute;
   top: calc(4 * var(--menu-top));
-  left: calc(3 * var(--menu-left));  
+  left: calc(3 * var(--menu-left));
 }
 
 .comments__marker {
   position: absolute;
-  left: 0.8rem;  
+  left: 0.8rem;
   top: -1rem;
   width: 2.8rem;
-  height: 2.5rem;   
+  height: 2.5rem;
   background-image: url(../i/comment.png);
   background-repeat: no-repeat;
   cursor: pointer;
@@ -380,8 +393,8 @@ body {
 
 .comments__marker-checkbox {
   position: absolute;
-  left: 0.8rem;  
-  top: -1rem;  
+  left: 0.8rem;
+  top: -1rem;
   width: 2.8rem;
   height: 2.5rem;
   margin: 0;
@@ -405,7 +418,7 @@ body {
   border: 0.1rem solid red;
 }
 
-.comments__marker-checkbox:checked + .comments__body {
+.comments__marker-checkbox:checked+.comments__body {
   display: block;
 }
 
@@ -414,7 +427,7 @@ body {
   padding: 1.3rem 0;
 }
 
-.comment + .comment {
+.comment+.comment {
   border-top: 1px solid #50606e;
 }
 
@@ -428,12 +441,14 @@ body {
   line-height: 130%;
 }
 
-.comments__body input, .comments__body textarea {
+.comments__body input,
+.comments__body textarea {
   border: 1px solid #8b9cad;
   color: #8b9cad;
 }
 
-.comments__body input:focus, .comments__body textarea:focus {
+.comments__body input:focus,
+.comments__body textarea:focus {
   outline: none;
 }
 
@@ -446,13 +461,14 @@ body {
   font-family: inherit;
   font-size: 1.3rem;
   color: #8b9cad;
-  -ms-user-select: text; 
-  -moz-user-select: text; 
-  -webkit-user-select: text;   
-  user-select: text;  
+  -ms-user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
-.comments__close, .comments__submit {
+.comments__close,
+.comments__submit {
   width: 10rem;
   height: 2.8rem;
   text-transform: uppercase;
@@ -461,12 +477,14 @@ body {
   cursor: pointer;
 }
 
-.comments__close:hover, .comments__submit:hover {
+.comments__close:hover,
+.comments__submit:hover {
   color: #ffffff;
   border-color: #ffffff;
 }
 
-.comments__input, .comments__submit {
+.comments__input,
+.comments__submit {
   background-color: #485561;
 }
 
@@ -478,29 +496,33 @@ body {
 .comments__input::-webkit-input-placeholder {
   color: #8b9cad;
 }
+
 .comments__input::-moz-placeholder {
   color: #8b9cad;
 }
+
 .comments__input:-ms-input-placeholder {
   color: #8b9cad;
 }
+
 .comments__input:-moz-placeholder {
   color: #8b9cad;
 }
+
 .comments__input:placeholder {
   color: #8b9cad;
 }
 
-.comments__body::-webkit-scrollbar-track{
+.comments__body::-webkit-scrollbar-track {
   background-color: #384654;
 }
 
-.comments__body::-webkit-scrollbar{
+.comments__body::-webkit-scrollbar {
   width: 0.7rem;
   background-color: #dae2ea;
 }
 
-.comments__body::-webkit-scrollbar-thumb{
+.comments__body::-webkit-scrollbar-thumb {
   background-color: #dae2ea;
 }
 
@@ -513,10 +535,10 @@ body {
   background-color: #485561;
   border: 0.1rem solid #9fb0c1;
   color: #fff;
-  -ms-user-select: text; 
-  -moz-user-select: text; 
-  -webkit-user-select: text;   
-  user-select: text;  
+  -ms-user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .menu_copy {
@@ -536,14 +558,13 @@ body {
   background-color: #5f7488;
 }
 
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~ ошибка ~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 .error {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);  
+  transform: translate(-50%, -50%);
   max-width: 60rem;
   color: #fff;
   text-shadow: 0 0 0.2rem #000;
@@ -565,7 +586,7 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);  
+  transform: translate(-50%, -50%);
   max-width: 60rem;
   z-index: 10;
   color: #fff;
@@ -579,7 +600,7 @@ body {
 
 .loader {
   height: 3rem;
-  width: 100%; 
+  width: 100%;
   min-width: 16.2rem;
   text-align: center;
 }
@@ -588,7 +609,7 @@ body {
   position: relative;
   top: 50%;
   display: inline-block;
-  vertical-align: top;  
+  vertical-align: top;
   width: 1rem;
   height: 1rem;
   margin: 0 0.5rem;
@@ -604,21 +625,26 @@ body {
 .loader span:nth-child(1) {
   animation: pulse 1s infinite 0.2s;
 }
+
 .loader span:nth-child(2) {
   animation: pulse 1s infinite 0.4s;
 }
+
 .loader span:nth-child(3) {
   animation: pulse 1s infinite 0.6s;
 }
+
 .loader span:nth-child(4) {
   animation: pulse 1s infinite 0.8s;
 }
+
 .loader span:nth-child(5) {
   animation: pulse 1s infinite 1s;
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     background: #fff;
   }
   50% {
@@ -626,35 +652,37 @@ body {
   }
 }
 
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~ переключения ~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~ initial ~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-.menu[data-state="initial"] > .menu__item {
+.menu[data-state="initial"]>.menu__item {
   display: none;
 }
 
-.menu[data-state="initial"] > .menu__item.drag, .menu[data-state="initial"] > .menu__item.new, .menu[data-state="initial"] > .menu__item.burger {
+.menu[data-state="initial"]>.menu__item.drag,
+.menu[data-state="initial"]>.menu__item.new,
+.menu[data-state="initial"]>.menu__item.burger {
   display: inline-block;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~ default ~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-.menu[data-state="default"] > .menu__item.burger {
+.menu[data-state="default"]>.menu__item.burger {
   display: none;
 }
 
-.menu[data-state="default"] > .mode {
+.menu[data-state="default"]>.mode {
   display: inline-block;
 }
 
-.menu[data-state="default"] > .tools {
+.menu[data-state="default"]>.tools {
   display: none;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~ selected ~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-.menu[data-state="selected"] > .mode {
+.menu[data-state="selected"]>.mode {
   display: none;
 }
 
@@ -662,6 +690,13 @@ body {
   display: none;
 }
 
-.menu[data-state="selected"] > .menu__item[data-state="selected"], .menu__item[data-state="selected"] + .tool {
+.menu[data-state="selected"]>.menu__item[data-state="selected"],
+.menu__item[data-state="selected"]+.tool {
   display: inline-block;
+}
+
+/* hidden */
+
+.hidden {
+  display: none;
 }
