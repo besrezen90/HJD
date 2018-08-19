@@ -104,12 +104,45 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('.downloadFile')
         .addEventListener('change', onSelectFiles);
 
+
     function onSelectFiles(event) {
-        console.log(event)
-        const files = event.currentTarget.files;
-        console.log(files);
+        const files = Array.from(event.currentTarget.files);
+        updateFilesInfo(files);
     }
 
+    function updateFilesInfo(files) {
+
+        if (files[0].type !== "image/png" && files[0].type !== "image/jpeg") {
+            error.style.display = '';
+            return
+        }
+        error.style.display = 'none';
+        sendFile(files[0])
+    }
+
+    function sendFile(file) {
+
+        const formData = new FormData();
+        formData.append('title', file.name);
+        formData.append('image', file);
+      
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://neto-api.herokuapp.com/pic', true);
+
+        
+
+        xhr.addEventListener('loadstart', (event) => {
+            imageLoader.style.display = 'block';
+        })
+        xhr.addEventListener('loadend', () => {
+            imageLoader.style.display = 'none';
+        })
+
+
+        xhr.send(formData);
+      
+
+    }
 
 
 
