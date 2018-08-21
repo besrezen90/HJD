@@ -6,13 +6,100 @@ const wrap = document.querySelector('.wrap.app'),
     imageLoader = wrap.querySelector('.image-loader');
 
 
+
+
 let dragMenu = null; // Переменная для перетаскивания меню
 
 
+/* GET запрос для по ID */
+
+function loadInformFromId(id) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `https://neto-api.herokuapp.com/pic/${id}`)
+    xhr.send();
+
+    xhr.addEventListener('load', () => {
+        let newImage = JSON.parse(xhr.responseText)
+        console.log(newImage)
+        /* функция меняет ссылку в "поделится" */
+        changeUrl(newImage)
+        /* функция добавляет в изображение src */
+        loadImage(newImage)
+        /* функция загружает свежую маску */
+        /* функция загружает свежие комментарии */
+    })
+}
+
+/* функция меняет ссылку в "поделится" */
+
+function changeUrl(obj) {
+    if (obj.id) {        
+        let url = window.location.href;
+        menu.querySelector('.menu__url').value = url + `?${obj.id}`;
+    } else return
+}
+
+/* функция добавляет в изображение src */
+
+function loadImage(obj) {
+    if (obj.url) {
+        sessionStorage.url = obj.url;
+        currentImage.src = obj.url;
+        currentImage.dataset.load = 'load';
+        currentImage.style.width = '70%';
+        reloadStatus('default')
+        menu.querySelector('.share').click();
+    } else return
+}
 
 
-/* Создание Input для загрузки изображения */
-/* ------------------Реализовать загрузку на сервер--------------- */
+/* Создание Input для загрузки изображения + Загрузка Drag&Drop + POST запрос для загрузки на сервер */
+function updateFilesInfo(files) {
+
+    if (files[0].type !== "image/png" && files[0].type !== "image/jpeg") {
+        error.style.display = '';
+        return
+    }
+
+    setTimeout(function () {
+        error.style.display = 'none'
+    }, 5000);
+    sendFile(files[0])
+}
+
+function sendFile(file) {
+
+    const formData = new FormData();
+    formData.append('title', file.name);
+    formData.append('image', file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://neto-api.herokuapp.com/pic', true);
+
+
+
+    xhr.addEventListener('loadstart', (event) => {
+        error.style.display = 'none';
+        imageLoader.style.display = 'block';
+    })
+    xhr.addEventListener('loadend', () => {
+        if (xhr.status !== 200) error.style.display = '';
+        imageLoader.style.display = 'none';
+    })
+
+    xhr.addEventListener('load', (event) => {
+        if (xhr.status === 200) {
+
+            let newCurrentImage = JSON.parse(xhr.responseText);
+            loadInformFromId(newCurrentImage.id)
+        } else console.log('error')
+    })
+
+
+    xhr.send(formData);
+
+}
+
 function createNewInput() {
     const newInput = document.createElement('input');
     newInput.setAttribute('type', 'file');
@@ -33,54 +120,29 @@ function createNewInput() {
         updateFilesInfo(files);
     }
 
-    function updateFilesInfo(files) {
-
-        if (files[0].type !== "image/png" && files[0].type !== "image/jpeg") {
-            error.style.display = '';
-            return
-        }
-        error.style.display = 'none';
-        sendFile(files[0])
-    }
-
-    function sendFile(file) {
-
-        const formData = new FormData();
-        formData.append('title', file.name);
-        formData.append('image', file);
-
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'https://neto-api.herokuapp.com/pic', true);
-
-
-
-        xhr.addEventListener('loadstart', (event) => {
-            error.style.display = 'none';
-            imageLoader.style.display = 'block';
-        })
-        xhr.addEventListener('loadend', () => {
-            if (xhr.status !== 200) error.style.display = '';
-            imageLoader.style.display = 'none';
-        })
-
-        xhr.addEventListener('load', (event) => {
-            if (xhr.status === 200) {
-
-                let newCurrentImage = JSON.parse(xhr.responseText);
-                sessionStorage.src = newCurrentImage.url;
-                requestLastImage()
-
-            } else console.log('error')
-        })
-
-
-        xhr.send(formData);
-
-    }
 
     document.querySelector('.menu__item.mode.new').appendChild(newInput);
 }
 document.addEventListener('DOMContentLoaded', createNewInput)
+
+/* Drag&Drop изображения */
+function onFilesDrop(event) {
+    event.preventDefault();
+
+    const files = Array.from(event.dataTransfer.files);
+
+    if (currentImage.dataset.load === 'load') {
+        error.style.display = ''
+        setTimeout(function () {
+            error.style.display = 'none'
+        }, 5000);
+        return;
+    }
+    updateFilesInfo(files);
+}
+
+wrap.addEventListener('drop', onFilesDrop);
+wrap.addEventListener('dragover', event => event.preventDefault());
 
 
 
@@ -103,21 +165,25 @@ function reloadStatus(string) {
     }
 }
 
-/* Проверка наличия ранее загруженного изображения */
-function requestLastImage() {
-
-    if (sessionStorage.src) {
-        currentImage.src = sessionStorage.src
+/* Проверка наличия ранее загруженного изображения или наличия ID в ссылке*/
+function requestImageInfo() {
+/*     if (url.id) {
+        console.log('Запусти гет запрос по данному Id из URL')
+    } */
+    console.log('добавь проверку на ID в адресной строке')
+    if (sessionStorage.url) {
+        currentImage.src = sessionStorage.url
         currentImage.style.width = '70%'
+        currentImage.dataset.load = 'load';
         reloadStatus('default')
     } else {
         reloadStatus('initial')
     }
 }
 
-document.addEventListener('DOMContentLoaded', requestLastImage)
+document.addEventListener('DOMContentLoaded', requestImageInfo)
 
-/* Проверка наличия прошлого состояния меню */ 
+/* Проверка наличия прошлого состояния меню */
 
 function requestLastMenuPosition() {
     if (localStorage.x && localStorage.y) {
@@ -195,6 +261,10 @@ document.addEventListener('mousemove', event => {
 menu.firstElementChild.addEventListener('mouseup', event => {
     dragMenu = null;
 })
+
+
+
+
 
 
 
