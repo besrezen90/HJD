@@ -9,6 +9,8 @@ const wrap = document.querySelector('.wrap.app'),
 
 
 let dragMenu = null; // Переменная для перетаскивания меню
+let currentColor = menu.querySelector('.menu__color[checked]');
+
 
 
 /* GET запрос для по ID */
@@ -20,12 +22,12 @@ function loadInformFromId(id) {
 
     xhr.addEventListener('load', () => {
         let newImage = JSON.parse(xhr.responseText)
-        console.log(newImage)
         /* функция меняет ссылку в "поделится" */
         changeUrl(newImage)
         /* функция добавляет в изображение src */
         loadImage(newImage)
         /* функция загружает свежую маску */
+        loadMask(newImage)
         /* функция загружает свежие комментарии */
     })
 }
@@ -33,7 +35,13 @@ function loadInformFromId(id) {
 /* функция меняет ссылку в "поделится" */
 
 function changeUrl(obj) {
-    if (obj.id) {        
+    const str = window.location.href;
+    const regex = /\?(.*)/;
+    let id = str.match(regex)
+    if(id) {
+        let url = window.location.href;
+        menu.querySelector('.menu__url').value = url;
+    } else if (obj.id) {
         let url = window.location.href;
         menu.querySelector('.menu__url').value = url + `?${obj.id}`;
     } else return
@@ -43,6 +51,7 @@ function changeUrl(obj) {
 
 function loadImage(obj) {
     if (obj.url) {
+        sessionStorage.id = obj.id;
         sessionStorage.url = obj.url;
         currentImage.src = obj.url;
         currentImage.dataset.load = 'load';
@@ -52,6 +61,14 @@ function loadImage(obj) {
     } else return
 }
 
+/* функция загружает свежую маску */
+
+function loadMask(obj) {
+    if(obj.mask) {
+        console.log(obj.mask)
+        console.log('маска нашлась - загружаю и открываю вебсокет')
+    } else console.log('маски нет, создан пустой канвас и открыт веб сокет')
+}
 
 /* Создание Input для загрузки изображения + Загрузка Drag&Drop + POST запрос для загрузки на сервер */
 function updateFilesInfo(files) {
@@ -167,14 +184,13 @@ function reloadStatus(string) {
 
 /* Проверка наличия ранее загруженного изображения или наличия ID в ссылке*/
 function requestImageInfo() {
-/*     if (url.id) {
-        console.log('Запусти гет запрос по данному Id из URL')
-    } */
-    console.log('добавь проверку на ID в адресной строке')
-    if (sessionStorage.url) {
-        currentImage.src = sessionStorage.url
-        currentImage.style.width = '70%'
-        currentImage.dataset.load = 'load';
+    const str = window.location.href;
+    const regex = /\?(.*)/;
+    let id = str.match(regex)
+    if (id) {
+        loadInformFromId(id[1]);
+    } else if (sessionStorage.id) {
+        loadInformFromId(sessionStorage.id)
         reloadStatus('default')
     } else {
         reloadStatus('initial')
@@ -202,7 +218,11 @@ menu.addEventListener('click', event => {
         modeComments = menu.querySelector('.comments'),
         modeCommentsAll = wrap.querySelectorAll('.comments__form'),
         modeDraw = menu.querySelector('.draw'),
-        modeShare = menu.querySelector('.share');
+        modeShare = menu.querySelector('.share'),
+        modeCopy = menu.querySelector('.menu_copy'),
+        modeToggle = menu.querySelectorAll('.menu__toggle');
+
+        
 
     if (event.target === burgerMenu || event.target.parentNode === burgerMenu) {
         reloadStatus('default')
@@ -221,6 +241,51 @@ menu.addEventListener('click', event => {
         modeMenuAll.forEach(item => item.dataset.state = " ");
         modeShare.dataset.state = 'selected';
         reloadStatus('selected')
+    }
+    if(event.target === modeCopy) {
+       menu.querySelector('.menu__url').select();
+       try {
+		    let successful = document.execCommand('copy');
+		    let msg = successful ? 'успешно ' : 'не';  
+		    console.log(`URL ${msg} скопирован`);  
+	    } catch(err) {  
+		    console.log('Ошибка копирования');  
+	    }  
+	    window.getSelection().removeAllRanges();
+    }
+    if (event.target === modeToggle[0] || event.target === modeToggle[1]) {
+        if(event.target.value === 'off') {
+            modeCommentsAll.forEach(elem => elem.classList.add('hidden'))
+        }
+        if(event.target.value === 'on') {
+            modeCommentsAll.forEach(elem => elem.classList.remove('hidden'))
+        }
+    }
+    if (event.target.classList.contains('menu__color')) {
+        menu.querySelectorAll('.menu__color').forEach(elem => {
+            if(elem.hasAttribute('checked')) elem.removeAttribute('checked')
+        })
+        event.target.setAttribute('checked','checked');
+        switch(event.target.value) {
+            case 'red':
+            currentColor = '#eb5d56'
+            break;
+            case 'yellow':
+            currentColor = '#f4d22f'
+            break;
+            case 'green':
+            currentColor = '#6ebf44'
+            break;
+            case 'blue':
+            currentColor = '#52a7f7'
+            break;
+            case 'purple':
+            currentColor = '#b36ae0'
+            break;
+            default:
+            currentColor = '#6ebf44'
+            break;
+        }      
     }
 
 })
