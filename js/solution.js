@@ -8,8 +8,15 @@ const wrap = document.querySelector('.wrap.app'),
 
 
 
+
+
 let dragMenu = null; // Переменная для перетаскивания меню
-let currentColor = menu.querySelector('.menu__color[checked]');
+let currentColor = "#6ebf44";
+let newImageMask;
+let newImageMaskHeight;
+let isDrawing = false;
+let connection;
+
 
 
 
@@ -21,11 +28,13 @@ function loadInformFromId(id) {
     xhr.send();
 
     xhr.addEventListener('load', () => {
-        let newImage = JSON.parse(xhr.responseText)
+        let newImage = JSON.parse(xhr.responseText);
         /* функция меняет ссылку в "поделится" */
         changeUrl(newImage)
         /* функция добавляет в изображение src */
-        loadImage(newImage)
+        loadImage(newImage);
+        /* WSS */
+        wss(newImage.id);
         /* функция загружает свежую маску */
         loadMask(newImage)
         /* функция загружает свежие комментарии */
@@ -38,7 +47,7 @@ function changeUrl(obj) {
     const str = window.location.href;
     const regex = /\?(.*)/;
     let id = str.match(regex)
-    if(id) {
+    if (id) {
         let url = window.location.href;
         menu.querySelector('.menu__url').value = url;
     } else if (obj.id) {
@@ -55,7 +64,9 @@ function loadImage(obj) {
         sessionStorage.url = obj.url;
         currentImage.src = obj.url;
         currentImage.dataset.load = 'load';
-        currentImage.style.width = '70%';
+        currentImage.addEventListener('load', (event) => {
+            createCanvas()
+        })
         reloadStatus('default')
         menu.querySelector('.share').click();
     } else return
@@ -64,10 +75,102 @@ function loadImage(obj) {
 /* функция загружает свежую маску */
 
 function loadMask(obj) {
-    if(obj.mask) {
-        console.log(obj.mask)
+    if (typeof obj === 'object' && obj.mask) {
+        createNewImageMask(obj)
         console.log('маска нашлась - загружаю и открываю вебсокет')
-    } else console.log('маски нет, создан пустой канвас и открыт веб сокет')
+    }
+    if (typeof obj === 'string') {
+        wrap.querySelector('.image-mask').src = obj;
+        wrap.querySelector('.image-mask').classList.remove('hidden')
+    } else {
+        console.log('маски нет, создан пустой канвас и открыт веб сокет')
+    }
+}
+/* Создаем изображение с маской */
+function createNewImageMask(obj) {
+    if (!wrap.querySelector('.image-mask')) {
+        let newImage = document.createElement('img');
+        newImage.classList.add('image-mask');
+        newImage.setAttribute('src', obj.mask);
+        wrap.appendChild(newImage)
+        wrap.insertBefore(currentImage, wrap.querySelector('.image-mask'))
+    } else {
+        console.log('изменяем существующий скрытый img и делаем его видимым')
+        wrap.querySelector('.image-mask').src = obj.mask;
+        wrap.querySelector('.image-mask').classList.remove('hidden')
+    }
+
+}
+/* Создаем канвас */
+function createCanvas() {
+    const drawArea = document.createElement('canvas');
+    drawArea.classList.add('canvas-area');
+    wrap.appendChild(drawArea);
+    wrap.insertBefore(currentImage, wrap.querySelector('.canvas-area'));
+    drawArea.width = currentImage.width;
+    drawArea.height = currentImage.height;
+    const canvas = wrap.querySelector('.canvas-area');
+    const ctx = canvas.getContext('2d');
+
+
+    function startDrawing(e) {
+        isDrawing = true;
+        ctx.strokeStyle = currentColor;
+        ctx.beginPath();
+        ctx.moveTo(e.pageX - canvas.getBoundingClientRect().left, e.pageY - canvas.getBoundingClientRect().top);
+    }
+
+    function draw(e) {
+        if (isDrawing == true) {
+            var x = e.pageX - canvas.getBoundingClientRect().left;
+            var y = e.pageY - canvas.getBoundingClientRect().top;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+    }
+
+    function stopDrawing() {
+        if (isDrawing) sendMaskState();
+        isDrawing = false;
+
+    }
+
+    function sendMaskState() {
+        canvas.toBlob(function (blob) {
+            connection.send(blob);
+            console.log('отправили и очистили')
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+    }
+
+    drawArea.addEventListener('mousedown', startDrawing);
+    drawArea.addEventListener('mouseup', stopDrawing);
+    drawArea.addEventListener('mouseout', stopDrawing);
+    drawArea.addEventListener('mousemove', draw);
+}
+/* Открываем webSocket */
+function wss(id) {
+/* Необходимо разобраться с тем как правильно отрабатывают события веб соккета */
+    connection = new WebSocket(`wss://neto-api.herokuapp.com/pic/${id}`);
+    connection.addEventListener('message', event => {
+        if (JSON.parse(event.data).event === 'pic') {
+            if (JSON.parse(event.data).pic.mask) {
+                loadMask(JSON.parse(event.data).pic.mask)
+            } else {
+                console.log('создаем img и делаем его скрытым')
+                let newImage = document.createElement('img');
+                newImage.classList.add('image-mask');
+                newImage.setAttribute('src', '');
+                newImage.classList.add('hidden')
+                wrap.appendChild(newImage)
+                wrap.insertBefore(currentImage, wrap.querySelector('.image-mask'))
+            }
+        }
+        if (JSON.parse(event.data).event === 'mask') {
+            console.log('Маска успешно изменена')
+
+        }
+    });
 }
 
 /* Создание Input для загрузки изображения + Загрузка Drag&Drop + POST запрос для загрузки на сервер */
@@ -222,7 +325,7 @@ menu.addEventListener('click', event => {
         modeCopy = menu.querySelector('.menu_copy'),
         modeToggle = menu.querySelectorAll('.menu__toggle');
 
-        
+
 
     if (event.target === burgerMenu || event.target.parentNode === burgerMenu) {
         reloadStatus('default')
@@ -242,50 +345,50 @@ menu.addEventListener('click', event => {
         modeShare.dataset.state = 'selected';
         reloadStatus('selected')
     }
-    if(event.target === modeCopy) {
-       menu.querySelector('.menu__url').select();
-       try {
-		    let successful = document.execCommand('copy');
-		    let msg = successful ? 'успешно ' : 'не';  
-		    console.log(`URL ${msg} скопирован`);  
-	    } catch(err) {  
-		    console.log('Ошибка копирования');  
-	    }  
-	    window.getSelection().removeAllRanges();
+    if (event.target === modeCopy) {
+        menu.querySelector('.menu__url').select();
+        try {
+            let successful = document.execCommand('copy');
+            let msg = successful ? 'успешно ' : 'не';
+            console.log(`URL ${msg} скопирован`);
+        } catch (err) {
+            console.log('Ошибка копирования');
+        }
+        window.getSelection().removeAllRanges();
     }
     if (event.target === modeToggle[0] || event.target === modeToggle[1]) {
-        if(event.target.value === 'off') {
+        if (event.target.value === 'off') {
             modeCommentsAll.forEach(elem => elem.classList.add('hidden'))
         }
-        if(event.target.value === 'on') {
+        if (event.target.value === 'on') {
             modeCommentsAll.forEach(elem => elem.classList.remove('hidden'))
         }
     }
     if (event.target.classList.contains('menu__color')) {
         menu.querySelectorAll('.menu__color').forEach(elem => {
-            if(elem.hasAttribute('checked')) elem.removeAttribute('checked')
+            if (elem.hasAttribute('checked')) elem.removeAttribute('checked')
         })
-        event.target.setAttribute('checked','checked');
-        switch(event.target.value) {
+        event.target.setAttribute('checked', 'checked');
+        switch (event.target.value) {
             case 'red':
-            currentColor = '#eb5d56'
-            break;
+                currentColor = '#eb5d56'
+                break;
             case 'yellow':
-            currentColor = '#f4d22f'
-            break;
+                currentColor = '#f4d22f'
+                break;
             case 'green':
-            currentColor = '#6ebf44'
-            break;
+                currentColor = '#6ebf44'
+                break;
             case 'blue':
-            currentColor = '#52a7f7'
-            break;
+                currentColor = '#52a7f7'
+                break;
             case 'purple':
-            currentColor = '#b36ae0'
-            break;
+                currentColor = '#b36ae0'
+                break;
             default:
-            currentColor = '#6ebf44'
-            break;
-        }      
+                currentColor = '#6ebf44'
+                break;
+        }
     }
 
 })
@@ -326,4 +429,3 @@ document.addEventListener('mousemove', event => {
 menu.firstElementChild.addEventListener('mouseup', event => {
     dragMenu = null;
 })
-
