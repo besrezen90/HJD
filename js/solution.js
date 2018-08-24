@@ -72,22 +72,25 @@ function loadImage(obj) {
 
 /* Создаем изображение с маской */
 function createNewImageMask(obj) {
-    let newImage = document.createElement('img');
+    if (!wrap.querySelector('.image-mask')) {
+        let newImage = document.createElement('img');
         newImage.classList.add('image-mask');
         wrap.appendChild(newImage);
         wrap.insertBefore(currentImage, wrap.querySelector('.image-mask'));
-        if (!obj) {
-            wrap.querySelector('.image-mask').setAttribute('src', " ");
-            wrap.querySelector('.image-mask').classList.add('hidden');
-        } else {
-            wrap.querySelector('.image-mask').setAttribute('src', obj);
-            wrap.querySelector('.image-mask').classList.remove('hidden');
-            wrap.querySelector('.image-mask').addEventListener('load', (e) => {
-                const canvas = wrap.querySelector('canvas');
-                const ctx = canvas.getContext('2d')
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            })
-        }
+    }
+    
+    if (!obj) {
+        wrap.querySelector('.image-mask').setAttribute('src', " ");
+        wrap.querySelector('.image-mask').classList.add('hidden');
+    } else {
+        wrap.querySelector('.image-mask').setAttribute('src', obj);
+        wrap.querySelector('.image-mask').classList.remove('hidden');
+        wrap.querySelector('.image-mask').addEventListener('load', (e) => {
+            const canvas = wrap.querySelector('canvas');
+            const ctx = canvas.getContext('2d')
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        })
+    }
 }
 
 /* Создаем канвас */
@@ -138,7 +141,7 @@ function createCanvas() {
 }
 /* Открываем webSocket */
 function wss(id) {
-/* Необходимо разобраться с тем как правильно отрабатывают события веб соккета */
+    /* Необходимо разобраться с тем как правильно отрабатывают события веб соккета */
     connection = new WebSocket(`wss://neto-api.herokuapp.com/pic/${id}`);
     connection.addEventListener('message', event => {
         if (JSON.parse(event.data).event === 'pic') {
