@@ -35,8 +35,6 @@ function loadInformFromId(id) {
         loadImage(newImage);
         /* WSS */
         wss(newImage.id);
-        /* функция загружает свежую маску */
-        loadMask(newImage)
         /* функция загружает свежие комментарии */
     })
 }
@@ -72,35 +70,26 @@ function loadImage(obj) {
     } else return
 }
 
-/* функция загружает свежую маску */
-
-function loadMask(obj) {
-    if (typeof obj === 'object' && obj.mask) {
-        createNewImageMask(obj)
-        console.log('маска нашлась - загружаю и открываю вебсокет')
-    }
-    if (typeof obj === 'string') {
-        wrap.querySelector('.image-mask').src = obj;
-        wrap.querySelector('.image-mask').classList.remove('hidden')
-    } else {
-        console.log('маски нет, создан пустой канвас и открыт веб сокет')
-    }
-}
 /* Создаем изображение с маской */
 function createNewImageMask(obj) {
-    if (!wrap.querySelector('.image-mask')) {
-        let newImage = document.createElement('img');
+    let newImage = document.createElement('img');
         newImage.classList.add('image-mask');
-        newImage.setAttribute('src', obj.mask);
-        wrap.appendChild(newImage)
-        wrap.insertBefore(currentImage, wrap.querySelector('.image-mask'))
-    } else {
-        console.log('изменяем существующий скрытый img и делаем его видимым')
-        wrap.querySelector('.image-mask').src = obj.mask;
-        wrap.querySelector('.image-mask').classList.remove('hidden')
-    }
-
+        wrap.appendChild(newImage);
+        wrap.insertBefore(currentImage, wrap.querySelector('.image-mask'));
+        if (!obj) {
+            wrap.querySelector('.image-mask').setAttribute('src', " ");
+            wrap.querySelector('.image-mask').classList.add('hidden');
+        } else {
+            wrap.querySelector('.image-mask').setAttribute('src', obj);
+            wrap.querySelector('.image-mask').classList.remove('hidden');
+            wrap.querySelector('.image-mask').addEventListener('load', (e) => {
+                const canvas = wrap.querySelector('canvas');
+                const ctx = canvas.getContext('2d')
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            })
+        }
 }
+
 /* Создаем канвас */
 function createCanvas() {
     const drawArea = document.createElement('canvas');
@@ -114,7 +103,7 @@ function createCanvas() {
 
 
     function startDrawing(e) {
-        isDrawing = true;
+        if (menu.querySelector('.menu__item.mode.draw').dataset.state === "selected") isDrawing = true;
         ctx.strokeStyle = currentColor;
         ctx.beginPath();
         ctx.moveTo(e.pageX - canvas.getBoundingClientRect().left, e.pageY - canvas.getBoundingClientRect().top);
@@ -138,8 +127,7 @@ function createCanvas() {
     function sendMaskState() {
         canvas.toBlob(function (blob) {
             connection.send(blob);
-            console.log('отправили и очистили')
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         });
     }
 
@@ -155,20 +143,13 @@ function wss(id) {
     connection.addEventListener('message', event => {
         if (JSON.parse(event.data).event === 'pic') {
             if (JSON.parse(event.data).pic.mask) {
-                loadMask(JSON.parse(event.data).pic.mask)
+                createNewImageMask(JSON.parse(event.data).pic.mask)
             } else {
-                console.log('создаем img и делаем его скрытым')
-                let newImage = document.createElement('img');
-                newImage.classList.add('image-mask');
-                newImage.setAttribute('src', '');
-                newImage.classList.add('hidden')
-                wrap.appendChild(newImage)
-                wrap.insertBefore(currentImage, wrap.querySelector('.image-mask'))
+                createNewImageMask()
             }
         }
         if (JSON.parse(event.data).event === 'mask') {
-            console.log('Маска успешно изменена')
-
+            createNewImageMask(JSON.parse(event.data).url)
         }
     });
 }
