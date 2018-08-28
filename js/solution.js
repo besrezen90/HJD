@@ -13,6 +13,11 @@ let isDrawing = false;
 let connection;
 let newCommentId;
 let serverId;
+let canvas;
+let ctx;
+
+const menuSize = menu.offsetHeight;
+
 
 
 
@@ -44,9 +49,13 @@ function changeUrl(obj) {
     if (id) {
         let url = window.location.href;
         menu.querySelector('.menu__url').value = url;
+        reloadStatus('default')
+        menu.querySelector('.comments').click();
     } else if (obj.id) {
         let url = window.location.href;
         menu.querySelector('.menu__url').value = url + `?${obj.id}`;
+        reloadStatus('default')
+        menu.querySelector('.share').click();
     } else return
 }
 
@@ -61,8 +70,8 @@ function loadImage(obj) {
         currentImage.addEventListener('load', (event) => {
             createCanvas()
         })
-        reloadStatus('default')
-        menu.querySelector('.share').click();
+        // reloadStatus('default')
+        // menu.querySelector('.share').click();
     } else return
 }
 
@@ -82,8 +91,8 @@ function createNewImageMask(url) {
         wrap.querySelector('.image-mask').setAttribute('src', url);
         wrap.querySelector('.image-mask').classList.remove('hidden');
         wrap.querySelector('.image-mask').addEventListener('load', (e) => {
-            const canvas = wrap.querySelector('canvas');
-            const ctx = canvas.getContext('2d')
+            // const canvas = wrap.querySelector('canvas');
+            // const ctx = canvas.getContext('2d')
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         })
     }
@@ -97,8 +106,8 @@ function createCanvas() {
     wrap.insertBefore(currentImage, wrap.querySelector('.canvas-area'));
     drawArea.width = currentImage.width;
     drawArea.height = currentImage.height;
-    const canvas = wrap.querySelector('.canvas-area');
-    const ctx = canvas.getContext('2d');
+    canvas = wrap.querySelector('.canvas-area');
+    ctx = canvas.getContext('2d');
 
 
     function startDrawing(e) {
@@ -171,6 +180,8 @@ function updateFilesInfo(files) {
 
     if (files[0].type !== "image/png" && files[0].type !== "image/jpeg") {
         error.style.display = '';
+        error.querySelector('.error__message').textContent = 'Неверный формат файла. Пожалуйста, выберите изображение в формате .jpg или .png.';
+        
         return
     }
 
@@ -247,6 +258,7 @@ function onFilesDrop(event) {
     const files = Array.from(event.dataTransfer.files);
 
     if (currentImage.dataset.load === 'load') {
+        error.querySelector('.error__message').textContent = 'Чтобы загрузить новое изображение, пожалуйста, вопсользуйтесь пунктом «Загрузить новое» в меню.';
         error.style.display = ''
         setTimeout(function () {
             error.style.display = 'none'
@@ -385,8 +397,18 @@ menu.addEventListener('click', event => {
                 break;
         }
     }
-
+    checkMenuBody(event.currentTarget, event.currentTarget.getBoundingClientRect().left)
 })
+
+/* Проверка меню на состояние */
+
+function checkMenuBody(block, x) {
+    if(block.offsetHeight > menuSize) {
+        x--
+        menu.style.setProperty('--menu-left', x + 'px')
+        checkMenuBody(block, x)
+    } else return
+}
 
 /* Перетаскивание меню */
 
@@ -395,31 +417,31 @@ menu.firstElementChild.addEventListener('mousedown', event => {
 })
 
 document.addEventListener('mousemove', event => {
-    event.preventDefault();
-    if (dragMenu) {
-        let coord = {
-            x: event.pageX,
-            y: event.pageY
-        }
-
-        if (coord.x < (dragMenu.offsetWidth / 2)) {
+    event.preventDefault()
+    if(dragMenu) {
+        if (event.pageX < 0 + dragMenu.offsetWidth) {
             menu.style.setProperty('--menu-left', 0 + 'px')
             localStorage.x = 0;
+        } else if (event.pageX + menu.offsetWidth > document.documentElement.clientWidth - dragMenu.offsetWidth - 1) {
+            menu.style.setProperty('--menu-left', document.documentElement.clientWidth - menu.offsetWidth - 1 + 'px')
+            localStorage.x = document.documentElement.clientWidth - menu.offsetWidth - 1;
+        } else {
+            menu.style.setProperty('--menu-left', event.pageX - (dragMenu.offsetWidth / 2) + 'px')
+            localStorage.x = event.pageX - (dragMenu.offsetWidth / 2);
         }
-        if (coord.x > (dragMenu.offsetWidth / 2) && coord.x + menu.offsetWidth - (dragMenu.offsetWidth / 2) < document.documentElement.clientWidth) {
-            menu.style.setProperty('--menu-left', `${coord.x - (dragMenu.offsetWidth / 2)}px`)
-            localStorage.x = coord.x - (dragMenu.offsetWidth / 2);
-        }
-        if (coord.y < (dragMenu.offsetHeight / 2)) {
+        if (event.pageY < 0 + dragMenu.offsetHeight) {
             menu.style.setProperty('--menu-top', 0 + 'px')
             localStorage.y = 0;
-        }
-        if (coord.y > (dragMenu.offsetHeight / 2) && coord.y + menu.offsetHeight - (dragMenu.offsetHeight / 2) < document.documentElement.clientHeight) {
-            menu.style.setProperty('--menu-top', `${coord.y - (dragMenu.offsetHeight / 2)}px`)
-            localStorage.y = coord.y - (dragMenu.offsetHeight / 2);
+        } else if (event.pageY + (menu.offsetHeight / 2) > document.documentElement.clientHeight - (dragMenu.offsetHeight / 2)) {
+            menu.style.setProperty('--menu-top', document.documentElement.clientHeight - dragMenu.offsetHeight + 'px')
+            localStorage.y = document.documentElement.clientHeight - dragMenu.offsetHeight;
+        } else {
+            menu.style.setProperty('--menu-top', event.pageY - (dragMenu.offsetHeight / 2) + 'px')
+            localStorage.y = event.pageY - (dragMenu.offsetHeight / 2);
         }
     }
 })
+
 
 menu.firstElementChild.addEventListener('mouseup', event => {
     dragMenu = null;
@@ -582,3 +604,5 @@ function sendMessageForm(form) {
             console.log(er)
         });	
 }
+
+

@@ -585,6 +585,7 @@ body {
   max-width: 60rem;
   color: #fff;
   text-shadow: 0 0 0.2rem #000;
+  z-index: 5;
 }
 
 .error__header {
