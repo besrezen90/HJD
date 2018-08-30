@@ -19,7 +19,15 @@ let ctx;
 const menuSize = menu.offsetHeight;
 
 
-
+/* Генерация ошибки */ 
+function showError(string) {
+    error.classList.remove('hidden')
+    error.querySelector('.error__message').textContent = string;
+}
+/* Функция удаления ошибки при нажатии на "бургер" */
+function removeError() {
+    error.classList.add('hidden');
+}
 
 /* GET запрос для по ID */
 
@@ -179,15 +187,9 @@ function wss(id) {
 function updateFilesInfo(files) {
 
     if (files[0].type !== "image/png" && files[0].type !== "image/jpeg") {
-        error.style.display = '';
-        error.querySelector('.error__message').textContent = 'Неверный формат файла. Пожалуйста, выберите изображение в формате .jpg или .png.';
-        
+        showError('Неверный формат файла. Пожалуйста, выберите изображение в формате .jpg или .png.')        
         return
     }
-
-    setTimeout(function () {
-        error.style.display = 'none'
-    }, 5000);
     sendFile(files[0])
 }
 
@@ -205,11 +207,13 @@ function sendFile(file) {
 
 
     xhr.addEventListener('loadstart', (event) => {
-        error.style.display = 'none';
+        removeError()
         imageLoader.style.display = 'block';
     })
     xhr.addEventListener('loadend', () => {
-        if (xhr.status !== 200) error.style.display = '';
+        if (xhr.status !== 200) {
+            showError('Проблемы с загрузкой изображения, попробуйте позже')
+        }
         imageLoader.style.display = 'none';
     })
 
@@ -229,7 +233,7 @@ function sendFile(file) {
 function createNewInput() {
     const newInput = document.createElement('input');
     newInput.setAttribute('type', 'file');
-    newInput.setAttribute('accept', 'image/jpeg, image/png');
+    // newInput.setAttribute('accept', 'image/jpeg, image/png');
     newInput.setAttribute('class', 'downloadFile');
     newInput.style.position = 'absolute';
     newInput.style.display = 'block';
@@ -258,11 +262,7 @@ function onFilesDrop(event) {
     const files = Array.from(event.dataTransfer.files);
 
     if (currentImage.dataset.load === 'load') {
-        error.querySelector('.error__message').textContent = 'Чтобы загрузить новое изображение, пожалуйста, вопсользуйтесь пунктом «Загрузить новое» в меню.';
-        error.style.display = ''
-        setTimeout(function () {
-            error.style.display = 'none'
-        }, 5000);
+        showError('Чтобы загрузить новое изображение, пожалуйста, вопсользуйтесь пунктом «Загрузить новое» в меню.');
         return;
     }
     updateFilesInfo(files);
@@ -397,6 +397,7 @@ menu.addEventListener('click', event => {
                 break;
         }
     }
+    if(!error.classList.contains('hidden'))  removeError();
     checkMenuBody(event.currentTarget, event.currentTarget.getBoundingClientRect().left)
 })
 
