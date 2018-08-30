@@ -302,6 +302,7 @@ function requestImageInfo() {
         changeUrlNew(id[1])
         loadInformFromId(id[1]);
     } else if (sessionStorage.id) {
+        changeUrlNew(sessionStorage.id)
         loadInformFromId(sessionStorage.id)
         reloadStatus('default')
     } else {
