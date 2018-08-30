@@ -55,16 +55,20 @@ function changeUrl(obj) {
     const regex = /\?(.*)/;
     let id = str.match(regex)
     if (id) {
-        let url = window.location.href;
-        menu.querySelector('.menu__url').value = url;
-        reloadStatus('default')
-        menu.querySelector('.comments').click();
+        if(id[1] !== sessionStorage.newId) {
+            reloadStatus('default')
+            menu.querySelector('.share').click();
+        } else {
+            reloadStatus('default')
+            menu.querySelector('.comments').click();
+        }
     } else if (obj.id) {
-        let url = window.location.href;
-        menu.querySelector('.menu__url').value = url + `?${obj.id}`;
         reloadStatus('default')
         menu.querySelector('.share').click();
     } else return
+}
+function changeUrlNew(id) {
+    menu.querySelector('.menu__url').value = window.location.origin + `/index.html?${id}`;
 }
 
 /* функция добавляет в изображение src */
@@ -78,8 +82,6 @@ function loadImage(obj) {
         currentImage.addEventListener('load', (event) => {
             createCanvas()
         })
-        // reloadStatus('default')
-        // menu.querySelector('.share').click();
     } else return
 }
 
@@ -99,8 +101,6 @@ function createNewImageMask(url) {
         wrap.querySelector('.image-mask').setAttribute('src', url);
         wrap.querySelector('.image-mask').classList.remove('hidden');
         wrap.querySelector('.image-mask').addEventListener('load', (e) => {
-            // const canvas = wrap.querySelector('canvas');
-            // const ctx = canvas.getContext('2d')
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         })
     }
@@ -219,8 +219,9 @@ function sendFile(file) {
 
     xhr.addEventListener('load', (event) => {
         if (xhr.status === 200) {
-
             let newCurrentImage = JSON.parse(xhr.responseText);
+            sessionStorage.newId = newCurrentImage.id;
+            changeUrlNew(newCurrentImage.id)
             loadInformFromId(newCurrentImage.id)
         } else console.log('error')
     })
@@ -298,6 +299,7 @@ function requestImageInfo() {
     const regex = /\?(.*)/;
     let id = str.match(regex)
     if (id) {
+        changeUrlNew(id[1])
         loadInformFromId(id[1]);
     } else if (sessionStorage.id) {
         loadInformFromId(sessionStorage.id)
@@ -491,7 +493,8 @@ function addNewFormComment (x, y) {
     spanMarker.classList.add('comments__marker');
     form.appendChild(spanMarker);
 
-    form.addEventListener('submit', sendMessage)
+    form.addEventListener('submit', sendMessage);
+    form.addEventListener('keydown', keySendMessage)
 
     const inputMarker = document.createElement('input');
     inputMarker.setAttribute('type', 'checkbox');
@@ -575,8 +578,21 @@ function formatData(data) {
 
 /* Отправка нового сообщения */
 
+function keySendMessage(event) {
+    if (event.repeat) { return; }
+		if (!event.ctrlKey) { return; }
+
+		switch (event.code) {
+			case 'Enter':
+            sendMessageFormPress(event.currentTarget)
+			break;
+		}
+}
+
 function sendMessage(event) {
-    event.preventDefault()
+    if (event) {
+        event.preventDefault();
+    }
     const message = event.target.querySelector('.comments__input').value;
     const messageForm = `message=${encodeURIComponent(message)}&left=${encodeURIComponent(event.target.dataset.left)}&top=${encodeURIComponent(event.target.dataset.top)}`;
     if(message.length > 0) sendMessageForm(messageForm);
@@ -584,6 +600,15 @@ function sendMessage(event) {
     event.target.querySelector('.loader').classList.remove('hidden');
     event.target.querySelector('.comments__input').value = '';
 
+}
+
+function sendMessageFormPress(form) {
+    const message = form.querySelector('.comments__input').value;
+    const messageForm = `message=${encodeURIComponent(message)}&left=${encodeURIComponent(form.dataset.left)}&top=${encodeURIComponent(form.dataset.top)}`;
+    if(message.length > 0) sendMessageForm(messageForm);
+    else return;
+    form.querySelector('.loader').classList.remove('hidden');
+    form.querySelector('.comments__input').value = '';
 }
 
 function sendMessageForm(form) {
