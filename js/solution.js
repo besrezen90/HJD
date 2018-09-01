@@ -18,6 +18,7 @@ let ctx;
 
 const menuSize = menu.offsetHeight;
 const homeUrl = window.location.origin + `/index.html`;
+const clientWidth = document.documentElement.clientWidth;
 let uploadStatus = false; //Статус загружалось ли ранее изображение для перехода в режим поделится
 
 
@@ -627,3 +628,15 @@ function sendMessageForm(form) {
             console.log(er)
         });
 }
+
+
+/* Изменение положения комментариев при изменении размера окна браузера */
+window.addEventListener('resize', (e) => {
+    let formComment = wrap.querySelector('.comments__form')
+    if(formComment) {
+        let formComments = wrap.querySelectorAll('.comments__form');
+        formComments.forEach(form => {
+            form.style.left = `${form.dataset.left - ((clientWidth - document.documentElement.clientWidth) / 2)}px`
+        })
+    }
+})
