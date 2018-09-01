@@ -21,7 +21,7 @@ const homeUrl = window.location.origin + `/index.html`;
 let uploadStatus = false; //Статус загружалось ли ранее изображение для перехода в режим поделится
 
 
-/* Генерация ошибки */ 
+/* Генерация ошибки */
 function showError(string) {
     error.classList.remove('hidden')
     error.querySelector('.error__message').textContent = string;
@@ -54,12 +54,15 @@ function choiceMenu() {
     if (uploadStatus) {
         uploadStatus = false;
         reloadStatus('default');
-            menu.querySelector('.share').click();
-        } else {
-            reloadStatus('default')
-            menu.querySelector('.comments').click();
-        }
+        menu.querySelector('.share').click();
+    } else {
+        reloadStatus('default')
+        menu.querySelector('.comments').click();
+    }
 }
+
+/* функция меняет ссылку в "поделится" */
+
 function changeUrlNew(id) {
     menu.querySelector('.menu__url').value = window.location.origin + `/index.html?${id}`;
 }
@@ -147,12 +150,12 @@ function createCanvas() {
 }
 /* Открываем webSocket */
 function wss(id) {
-    /* Необходимо разобраться с тем как правильно отрабатывают события веб соккета */
+    changeUrlNew(id)
     serverId = id;
     connection = new WebSocket(`wss://neto-api.herokuapp.com/pic/${id}`);
     connection.addEventListener('message', event => {
         if (JSON.parse(event.data).event === 'pic') {
-            if(JSON.parse(event.data).pic.comments) {
+            if (JSON.parse(event.data).pic.comments) {
                 const comments = JSON.parse(event.data).pic.comments
                 for (let key in comments) {
                     upgrateComment(comments[key])
@@ -180,7 +183,7 @@ function wss(id) {
 function updateFilesInfo(files) {
 
     if (files[0].type !== "image/png" && files[0].type !== "image/jpeg") {
-        showError('Неверный формат файла. Пожалуйста, выберите изображение в формате .jpg или .png.')        
+        showError('Неверный формат файла. Пожалуйста, выберите изображение в формате .jpg или .png.')
         return
     }
     sendFile(files[0])
@@ -213,9 +216,8 @@ function sendFile(file) {
     xhr.addEventListener('load', (event) => {
         if (xhr.status === 200) {
             let newCurrentImage = JSON.parse(xhr.responseText);
-            sessionStorage.newId = newCurrentImage.id;
-            changeUrlNew(newCurrentImage.id)
             loadInformFromId(newCurrentImage.id)
+            uploadStatus = true;
         } else console.log('error')
     })
 
@@ -227,7 +229,6 @@ function sendFile(file) {
 function createNewInput() {
     const newInput = document.createElement('input');
     newInput.setAttribute('type', 'file');
-    // newInput.setAttribute('accept', 'image/jpeg, image/png');
     newInput.setAttribute('class', 'downloadFile');
     newInput.style.position = 'absolute';
     newInput.style.display = 'block';
@@ -292,10 +293,8 @@ function requestImageInfo() {
     const regex = /\?(.*)/;
     let id = str.match(regex)
     if (id) {
-        changeUrlNew(id[1])
         loadInformFromId(id[1]);
     } else if (sessionStorage.id) {
-        changeUrlNew(sessionStorage.id)
         loadInformFromId(sessionStorage.id)
         reloadStatus('default')
     } else {
@@ -393,14 +392,14 @@ menu.addEventListener('click', event => {
                 break;
         }
     }
-    if(!error.classList.contains('hidden'))  removeError();
+    if (!error.classList.contains('hidden')) removeError();
     checkMenuBody(event.currentTarget, event.currentTarget.getBoundingClientRect().left)
 })
 
 /* Проверка меню на состояние */
 
 function checkMenuBody(block, x) {
-    if(block.offsetHeight > menuSize) {
+    if (block.offsetHeight > menuSize) {
         x--
         menu.style.setProperty('--menu-left', x + 'px')
         checkMenuBody(block, x)
@@ -415,7 +414,7 @@ menu.firstElementChild.addEventListener('mousedown', event => {
 
 document.addEventListener('mousemove', event => {
     event.preventDefault()
-    if(dragMenu) {
+    if (dragMenu) {
         if (event.pageX < 0 + dragMenu.offsetWidth) {
             menu.style.setProperty('--menu-left', 0 + 'px')
             localStorage.x = 0;
@@ -444,13 +443,13 @@ menu.firstElementChild.addEventListener('mouseup', event => {
     dragMenu = null;
 })
 
-/* Обработчик клика по холсту для создания комментария */ 
+/* Обработчик клика по холсту для создания комментария */
 wrap.addEventListener('click', (e) => {
-    if(e.target === wrap.querySelector('canvas') && menu.querySelector('.menu__item.mode.comments').dataset.state === 'selected') {
+    if (e.target === wrap.querySelector('canvas') && menu.querySelector('.menu__item.mode.comments').dataset.state === 'selected') {
 
-        if(wrap.querySelector('[data-comment-id]')) {
+        if (wrap.querySelector('[data-comment-id]')) {
             wrap.querySelectorAll('[data-comment-id]').forEach(elem => {
-                if(!elem.querySelector('p')) elem.remove()
+                if (!elem.querySelector('p')) elem.remove()
             })
             addNewFormComment(e.pageX, e.pageY);
         } else addNewFormComment(e.pageX, e.pageY)
@@ -460,7 +459,7 @@ wrap.addEventListener('click', (e) => {
 
 /* Проверка комментариев */
 function upgrateComment(obj) {
-    if(wrap.querySelector(`.comments__form[data-comment-id='${obj.left + '&' + obj.top}']`)) {
+    if (wrap.querySelector(`.comments__form[data-comment-id='${obj.left + '&' + obj.top}']`)) {
         const cont = wrap.querySelector(`.comments__form[data-comment-id='${obj.left + '&' + obj.top}']`);
         addNewComment(obj.message, obj.timestamp, cont);
     } else {
@@ -469,8 +468,8 @@ function upgrateComment(obj) {
     }
 }
 
-/* Создание новвой формы комментариев */ 
-function addNewFormComment (x, y) {
+/* Создание новвой формы комментариев */
+function addNewFormComment(x, y) {
     const form = document.createElement('form');
     form.classList.add('comments__form');
     form.style.left = `${x}px`;
@@ -510,7 +509,7 @@ function addNewFormComment (x, y) {
     loader.classList.add('hidden')
     commentBox.appendChild(loader);
 
-    
+
     for (let i = 0; i < 5; i++) {
         const loadSpan = document.createElement('span');
         loader.appendChild(loadSpan);
@@ -535,10 +534,10 @@ function addNewFormComment (x, y) {
     divBody.appendChild(inputSubmit);
 
     form.addEventListener('click', (e) => {
-        if(event.target.classList.contains('comments__close') && event.currentTarget.querySelector('p')) {
+        if (event.target.classList.contains('comments__close') && event.currentTarget.querySelector('p')) {
             event.currentTarget.querySelector('.comments__marker-checkbox').checked = false;
         }
-        if(event.target.classList.contains('comments__close') && !event.currentTarget.querySelector('p')) {
+        if (event.target.classList.contains('comments__close') && !event.currentTarget.querySelector('p')) {
             event.currentTarget.remove();
         }
     })
@@ -546,7 +545,7 @@ function addNewFormComment (x, y) {
 
 }
 /* Создание нового блока комментариев */
-function addNewComment (text, time, cont) {
+function addNewComment(text, time, cont) {
     const comment = document.createElement('div');
     comment.classList.add('comment');
 
@@ -573,14 +572,18 @@ function formatData(data) {
 /* Отправка нового сообщения */
 
 function keySendMessage(event) {
-    if (event.repeat) { return; }
-		if (!event.ctrlKey) { return; }
+    if (event.repeat) {
+        return;
+    }
+    if (!event.ctrlKey) {
+        return;
+    }
 
-		switch (event.code) {
-			case 'Enter':
+    switch (event.code) {
+        case 'Enter':
             sendMessageFormPress(event.currentTarget)
-			break;
-		}
+            break;
+    }
 }
 
 function sendMessage(event) {
@@ -589,7 +592,7 @@ function sendMessage(event) {
     }
     const message = event.target.querySelector('.comments__input').value;
     const messageForm = `message=${encodeURIComponent(message)}&left=${encodeURIComponent(event.target.dataset.left)}&top=${encodeURIComponent(event.target.dataset.top)}`;
-    if(message.length > 0) sendMessageForm(messageForm);
+    if (message.length > 0) sendMessageForm(messageForm);
     else return;
     event.target.querySelector('.loader').classList.remove('hidden');
     event.target.querySelector('.comments__input').value = '';
@@ -599,30 +602,28 @@ function sendMessage(event) {
 function sendMessageFormPress(form) {
     const message = form.querySelector('.comments__input').value;
     const messageForm = `message=${encodeURIComponent(message)}&left=${encodeURIComponent(form.dataset.left)}&top=${encodeURIComponent(form.dataset.top)}`;
-    if(message.length > 0) sendMessageForm(messageForm);
+    if (message.length > 0) sendMessageForm(messageForm);
     else return;
     form.querySelector('.loader').classList.remove('hidden');
     form.querySelector('.comments__input').value = '';
 }
 
 function sendMessageForm(form) {
-	fetch(`https://neto-api.herokuapp.com/pic/${serverId}/comments`, {
-			method: 'POST',
-			body: form,
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
-			},
-		})
-		.then( res => {
-			if (res.status >= 200 && res.status < 300) {
-				return res;
-			}
-			throw new Error (res.statusText);
-		})
-		.then(res => res.json())
-		.catch(er => {
+    fetch(`https://neto-api.herokuapp.com/pic/${serverId}/comments`, {
+            method: 'POST',
+            body: form,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        })
+        .then(res => {
+            if (res.status >= 200 && res.status < 300) {
+                return res;
+            }
+            throw new Error(res.statusText);
+        })
+        .then(res => res.json())
+        .catch(er => {
             console.log(er)
-        });	
+        });
 }
-
-
