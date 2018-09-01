@@ -17,6 +17,8 @@ let canvas;
 let ctx;
 
 const menuSize = menu.offsetHeight;
+const homeUrl = window.location.origin + `/index.html`;
+let uploadStatus = false; //Статус загружалось ли ранее изображение для перехода в режим поделится
 
 
 /* Генерация ошибки */ 
@@ -38,8 +40,8 @@ function loadInformFromId(id) {
 
     xhr.addEventListener('load', () => {
         let newImage = JSON.parse(xhr.responseText);
-        /* функция меняет ссылку в "поделится" */
-        changeUrl(newImage)
+        /* Выбор открывающегося меню - поделиться или комментирование */
+        choiceMenu();
         /* функция добавляет в изображение src */
         loadImage(newImage);
         /* WSS */
@@ -47,25 +49,16 @@ function loadInformFromId(id) {
         /* функция загружает свежие комментарии */
     })
 }
-
-/* функция меняет ссылку в "поделится" */
-
-function changeUrl(obj) {
-    const str = window.location.href;
-    const regex = /\?(.*)/;
-    let id = str.match(regex)
-    if (id) {
-        if(id[1] !== sessionStorage.newId) {
-            reloadStatus('default')
+/* Выбор открывающегося меню - поделиться или комментирование */
+function choiceMenu() {
+    if (uploadStatus) {
+        uploadStatus = false;
+        reloadStatus('default');
             menu.querySelector('.share').click();
         } else {
             reloadStatus('default')
             menu.querySelector('.comments').click();
         }
-    } else if (obj.id) {
-        reloadStatus('default')
-        menu.querySelector('.share').click();
-    } else return
 }
 function changeUrlNew(id) {
     menu.querySelector('.menu__url').value = window.location.origin + `/index.html?${id}`;
