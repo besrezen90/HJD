@@ -77,6 +77,7 @@ function loadImage(obj) {
         currentImage.src = obj.url;
         currentImage.dataset.load = 'load';
         currentImage.addEventListener('load', (event) => {
+            if(wrap.querySelector('canvas')) wrap.querySelectorAll('canvas').forEach(canvas => canvas.remove());
             createCanvas()
         })
     } else return
