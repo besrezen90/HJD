@@ -577,14 +577,9 @@ function keySendMessage(event) {
     if (event.repeat) {
         return;
     }
-    if (!event.ctrlKey) {
-        return;
-    }
-
-    switch (event.code) {
-        case 'Enter':
-            sendMessageFormPress(event.currentTarget)
-            break;
+    if(event.code === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessageFormPress(event.currentTarget);
     }
 }
 
