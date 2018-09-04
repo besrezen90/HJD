@@ -440,8 +440,7 @@ document.addEventListener('mousemove', event => {
     }
 })
 
-
-menu.firstElementChild.addEventListener('mouseup', event => {
+document.addEventListener('mouseup', event => {
     dragMenu = null;
 })
 
@@ -489,7 +488,7 @@ function addNewFormComment(x, y) {
     form.appendChild(spanMarker);
 
     form.addEventListener('submit', sendMessage);
-    form.addEventListener('keydown', keySendMessage)
+    // form.addEventListener('keydown', keySendMessage) //КЛАВИАТУРА
 
     const inputMarker = document.createElement('input');
     inputMarker.setAttribute('type', 'checkbox');
@@ -571,17 +570,17 @@ function formatData(data) {
     } else return data;
 }
 
-/* Отправка нового сообщения */
+/* Отправка нового сообщения КЛАВИАТУРА*/
 
-function keySendMessage(event) {
-    if (event.repeat) {
-        return;
-    }
-    if(event.code === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        sendMessageFormPress(event.currentTarget);
-    }
-}
+// function keySendMessage(event) {
+//     if (event.repeat) {
+//         return;
+//     }
+//     if(event.code === 'Enter' && !event.shiftKey) {
+//         event.preventDefault();
+//         sendMessageFormPress(event.currentTarget);
+//     }
+// }
 
 function sendMessage(event) {
     if (event) {
@@ -595,15 +594,15 @@ function sendMessage(event) {
     event.target.querySelector('.comments__input').value = '';
 
 }
-
-function sendMessageFormPress(form) {
-    const message = form.querySelector('.comments__input').value;
-    const messageForm = `message=${encodeURIComponent(message)}&left=${encodeURIComponent(form.dataset.left)}&top=${encodeURIComponent(form.dataset.top)}`;
-    if (message.length > 0) sendMessageForm(messageForm);
-    else return;
-    form.querySelector('.loader').classList.remove('hidden');
-    form.querySelector('.comments__input').value = '';
-}
+/* КЛАВИАТУРА */
+// function sendMessageFormPress(form) {
+//     const message = form.querySelector('.comments__input').value;
+//     const messageForm = `message=${encodeURIComponent(message)}&left=${encodeURIComponent(form.dataset.left)}&top=${encodeURIComponent(form.dataset.top)}`;
+//     if (message.length > 0) sendMessageForm(messageForm);
+//     else return;
+//     form.querySelector('.loader').classList.remove('hidden');
+//     form.querySelector('.comments__input').value = '';
+// }
 
 function sendMessageForm(form) {
     fetch(`https://neto-api.herokuapp.com/pic/${serverId}/comments`, {
