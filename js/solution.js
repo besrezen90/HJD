@@ -558,7 +558,7 @@ function addNewComment(text, time, cont) {
 
     const newMessage = document.createElement('p');
     newMessage.classList.add('comment__message');
-    newMessage.textContent = text;
+    newMessage.innerText = text;
     comment.appendChild(newMessage);
 
     cont.querySelector('.comments__body').insertBefore(cont.querySelector('.comments__body').appendChild(comment), cont.querySelector('.loader').parentNode)
