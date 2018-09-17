@@ -15,6 +15,7 @@ let newCommentId;
 let serverId;
 let canvas;
 let ctx;
+let statusFirstSend = true; //Статус первой отправки изображения
 
 const menuSize = menu.offsetHeight;
 const homeUrl = window.location.origin + `/index.html`;
@@ -141,6 +142,10 @@ function createCanvas() {
     function sendMaskState() {
         canvas.toBlob(function (blob) {
             connection.send(blob);
+            if (statusFirstSend) {
+                statusFirstSend = false;
+                connection.close()
+            }
 
         });
     }
@@ -155,6 +160,7 @@ function wss(id) {
     changeUrlNew(id)
     serverId = id;
     connection = new WebSocket(`wss://neto-api.herokuapp.com/pic/${id}`);
+
     connection.addEventListener('message', event => {
         if (JSON.parse(event.data).event === 'pic') {
             if (JSON.parse(event.data).pic.comments) {
@@ -179,6 +185,10 @@ function wss(id) {
 
         }
     });
+    
+    connection.addEventListener('close', event => {
+        wss(id)
+    })
 }
 
 /* Создание Input для загрузки изображения + Загрузка Drag&Drop + POST запрос для загрузки на сервер */
