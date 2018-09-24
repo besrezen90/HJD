@@ -3,38 +3,36 @@ const wrap = document.querySelector('.wrap.app'),
     menu = wrap.querySelector('.menu'),
     currentImage = wrap.querySelector('.current-image'),
     error = wrap.querySelector('.error'),
-    imageLoader = wrap.querySelector('.image-loader');
+    imageLoader = wrap.querySelector('.image-loader'),
+    menuSize = menu.offsetHeight,
+    homeUrl = window.location.origin + `/index.html`,
+    clientWidth = document.documentElement.clientWidth;
 
-let dragMenu = null; // Переменная для перетаскивания меню
-let currentColor = "#6ebf44";
-let newImageMask;
-let newImageMaskHeight;
-let isDrawing = false;
-let connection;
-let newCommentId;
-let serverId;
-let canvas;
-let ctx;
-let statusFirstSend = true; //Статус первой отправки изображения
-
-const menuSize = menu.offsetHeight;
-const homeUrl = window.location.origin + `/index.html`;
-const clientWidth = document.documentElement.clientWidth;
-let uploadStatus = false; //Статус загружалось ли ранее изображение для перехода в режим поделится
-
+let dragMenu = null, // Переменная для перетаскивания меню
+    currentColor = "#6ebf44",
+    newImageMask,
+    newImageMaskHeight,
+    isDrawing = false,
+    connection,
+    newCommentId,
+    serverId,
+    canvas,
+    ctx,
+    statusFirstSend = true, //Статус первой отправки изображения
+    uploadStatus = false; //Статус загружалось ли ранее изображение для перехода в режим поделится
 
 /* Генерация ошибки */
 function showError(string) {
     error.classList.remove('hidden')
     error.querySelector('.error__message').textContent = string;
 }
+
 /* Функция удаления ошибки при нажатии на "бургер" */
 function removeError() {
     error.classList.add('hidden');
 }
 
 /* GET запрос для по ID */
-
 function loadInformFromId(id) {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `https://neto-api.herokuapp.com/pic/${id}`)
@@ -48,9 +46,9 @@ function loadInformFromId(id) {
         loadImage(newImage);
         /* WSS */
         wss(newImage.id);
-        /* функция загружает свежие комментарии */
     })
 }
+
 /* Выбор открывающегося меню - поделиться или комментирование */
 function choiceMenu() {
     if (uploadStatus) {
@@ -64,13 +62,11 @@ function choiceMenu() {
 }
 
 /* функция меняет ссылку в "поделится" */
-
 function changeUrlNew(id) {
     menu.querySelector('.menu__url').value = window.location.origin + `/index.html?${id}`;
 }
 
 /* функция добавляет в изображение src */
-
 function loadImage(obj) {
     if (obj.url) {
         sessionStorage.id = obj.id;
@@ -78,7 +74,7 @@ function loadImage(obj) {
         currentImage.src = obj.url;
         currentImage.dataset.load = 'load';
         currentImage.addEventListener('load', (event) => {
-            if(wrap.querySelector('canvas')) wrap.querySelectorAll('canvas').forEach(canvas => canvas.remove());
+            if (wrap.querySelector('canvas')) wrap.querySelectorAll('canvas').forEach(canvas => canvas.remove());
             createCanvas()
         })
     } else return
@@ -92,7 +88,6 @@ function createNewImageMask(url) {
         wrap.appendChild(newImage);
         wrap.insertBefore(currentImage, wrap.querySelector('.image-mask'));
     }
-
     if (!url) {
         wrap.querySelector('.image-mask').setAttribute('src', " ");
         wrap.querySelector('.image-mask').classList.add('hidden');
@@ -116,7 +111,6 @@ function createCanvas() {
     canvas = wrap.querySelector('.canvas-area');
     ctx = canvas.getContext('2d');
 
-
     function startDrawing(e) {
         if (menu.querySelector('.menu__item.mode.draw').dataset.state === "selected") isDrawing = true;
         ctx.strokeStyle = currentColor;
@@ -136,7 +130,6 @@ function createCanvas() {
     function stopDrawing() {
         if (isDrawing) sendMaskState();
         isDrawing = false;
-
     }
 
     function sendMaskState() {
@@ -146,7 +139,6 @@ function createCanvas() {
                 statusFirstSend = false;
                 connection.close()
             }
-
         });
     }
 
@@ -155,6 +147,7 @@ function createCanvas() {
     drawArea.addEventListener('mouseout', stopDrawing);
     drawArea.addEventListener('mousemove', draw);
 }
+
 /* Открываем webSocket */
 function wss(id) {
     changeUrlNew(id)
@@ -182,10 +175,9 @@ function wss(id) {
         if (JSON.parse(event.data).event === 'comment') {
             wrap.querySelectorAll('.loader').forEach(elem => elem.classList.add('hidden'));
             upgrateComment(JSON.parse(event.data).comment)
-
         }
     });
-    
+
     connection.addEventListener('close', event => {
         wss(id)
     })
@@ -193,7 +185,6 @@ function wss(id) {
 
 /* Создание Input для загрузки изображения + Загрузка Drag&Drop + POST запрос для загрузки на сервер */
 function updateFilesInfo(files) {
-
     if (files[0].type !== "image/png" && files[0].type !== "image/jpeg") {
         showError('Неверный формат файла. Пожалуйста, выберите изображение в формате .jpg или .png.')
         return
@@ -202,22 +193,20 @@ function updateFilesInfo(files) {
 }
 
 function sendFile(file) {
-
     wrap.querySelectorAll('.comments__form').forEach(elem => elem.remove())
-
     const formData = new FormData();
+
     formData.append('title', file.name);
     formData.append('image', file);
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'https://neto-api.herokuapp.com/pic', true);
 
-
-
     xhr.addEventListener('loadstart', (event) => {
         removeError()
         imageLoader.style.display = 'block';
     })
+
     xhr.addEventListener('loadend', () => {
         if (xhr.status !== 200) {
             showError('Проблемы с загрузкой изображения, попробуйте позже')
@@ -233,9 +222,7 @@ function sendFile(file) {
         } else console.log('error')
     })
 
-
     xhr.send(formData);
-
 }
 
 function createNewInput() {
@@ -257,17 +244,15 @@ function createNewInput() {
         updateFilesInfo(files);
     }
 
-
     document.querySelector('.menu__item.mode.new').appendChild(newInput);
 }
+
 document.addEventListener('DOMContentLoaded', createNewInput)
 
 /* Drag&Drop изображения */
 function onFilesDrop(event) {
     event.preventDefault();
-
     const files = Array.from(event.dataTransfer.files);
-
     if (currentImage.dataset.load === 'load') {
         showError('Чтобы загрузить новое изображение, пожалуйста, вопсользуйтесь пунктом «Загрузить новое» в меню.');
         return;
@@ -278,12 +263,9 @@ function onFilesDrop(event) {
 wrap.addEventListener('drop', onFilesDrop);
 wrap.addEventListener('dragover', event => event.preventDefault());
 
-
-
 /* Изменение состояния приложения и меню */
 function reloadStatus(string) {
     menu.querySelector('.burger').style.display = 'none'
-
     wrap.dataset.state = string
     if (string === 'default') {
         menu.dataset.state = 'default';
@@ -317,7 +299,6 @@ function requestImageInfo() {
 document.addEventListener('DOMContentLoaded', requestImageInfo)
 
 /* Проверка наличия прошлого состояния меню */
-
 function requestLastMenuPosition() {
     if (localStorage.x && localStorage.y) {
         menu.style.setProperty('--menu-left', `${localStorage.x}px`)
@@ -326,7 +307,6 @@ function requestLastMenuPosition() {
 }
 
 document.addEventListener('DOMContentLoaded', requestLastMenuPosition)
-
 
 /* Обработчик клика по меню */
 menu.addEventListener('click', event => {
@@ -338,8 +318,6 @@ menu.addEventListener('click', event => {
         modeShare = menu.querySelector('.share'),
         modeCopy = menu.querySelector('.menu_copy'),
         modeToggle = menu.querySelectorAll('.menu__toggle');
-
-
 
     if (event.target === burgerMenu || event.target.parentNode === burgerMenu) {
         reloadStatus('default')
@@ -409,7 +387,6 @@ menu.addEventListener('click', event => {
 })
 
 /* Проверка меню на состояние */
-
 function checkMenuBody(block, x) {
     if (block.offsetHeight > menuSize) {
         x--
@@ -419,7 +396,6 @@ function checkMenuBody(block, x) {
 }
 
 /* Перетаскивание меню */
-
 menu.firstElementChild.addEventListener('mousedown', event => {
     dragMenu = event.currentTarget;
 })
@@ -464,7 +440,6 @@ wrap.addEventListener('click', (e) => {
             })
             addNewFormComment(e.pageX, e.pageY);
         } else addNewFormComment(e.pageX, e.pageY)
-
     }
 })
 
@@ -498,7 +473,6 @@ function addNewFormComment(x, y) {
     form.appendChild(spanMarker);
 
     form.addEventListener('submit', sendMessage);
-    // form.addEventListener('keydown', keySendMessage) //КЛАВИАТУРА
 
     const inputMarker = document.createElement('input');
     inputMarker.setAttribute('type', 'checkbox');
@@ -519,7 +493,6 @@ function addNewFormComment(x, y) {
     loader.classList.add('loader');
     loader.classList.add('hidden')
     commentBox.appendChild(loader);
-
 
     for (let i = 0; i < 5; i++) {
         const loadSpan = document.createElement('span');
@@ -552,9 +525,10 @@ function addNewFormComment(x, y) {
             event.currentTarget.remove();
         }
     })
-    wrap.appendChild(form)
 
+    wrap.appendChild(form)
 }
+
 /* Создание нового блока комментариев */
 function addNewComment(text, time, cont) {
     const comment = document.createElement('div');
@@ -573,24 +547,13 @@ function addNewComment(text, time, cont) {
 
     cont.querySelector('.comments__body').insertBefore(cont.querySelector('.comments__body').appendChild(comment), cont.querySelector('.loader').parentNode)
 }
+
 /* Формат даты */
 function formatData(data) {
     if (data < 10) {
         return '0' + data;
     } else return data;
 }
-
-/* Отправка нового сообщения КЛАВИАТУРА*/
-
-// function keySendMessage(event) {
-//     if (event.repeat) {
-//         return;
-//     }
-//     if(event.code === 'Enter' && !event.shiftKey) {
-//         event.preventDefault();
-//         sendMessageFormPress(event.currentTarget);
-//     }
-// }
 
 function sendMessage(event) {
     if (event) {
@@ -602,17 +565,7 @@ function sendMessage(event) {
     else return;
     event.target.querySelector('.loader').classList.remove('hidden');
     event.target.querySelector('.comments__input').value = '';
-
 }
-/* КЛАВИАТУРА */
-// function sendMessageFormPress(form) {
-//     const message = form.querySelector('.comments__input').value;
-//     const messageForm = `message=${encodeURIComponent(message)}&left=${encodeURIComponent(form.dataset.left)}&top=${encodeURIComponent(form.dataset.top)}`;
-//     if (message.length > 0) sendMessageForm(messageForm);
-//     else return;
-//     form.querySelector('.loader').classList.remove('hidden');
-//     form.querySelector('.comments__input').value = '';
-// }
 
 function sendMessageForm(form) {
     fetch(`https://neto-api.herokuapp.com/pic/${serverId}/comments`, {
@@ -634,11 +587,10 @@ function sendMessageForm(form) {
         });
 }
 
-
 /* Изменение положения комментариев при изменении размера окна браузера */
 window.addEventListener('resize', (e) => {
     let formComment = wrap.querySelector('.comments__form')
-    if(formComment) {
+    if (formComment) {
         let formComments = wrap.querySelectorAll('.comments__form');
         formComments.forEach(form => {
             form.style.left = `${form.dataset.left - ((clientWidth - document.documentElement.clientWidth) / 2)}px`
