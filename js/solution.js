@@ -23,19 +23,19 @@ let dragMenu = null, // Переменная для перетаскивания
 
 /* Генерация ошибки */
 function showError(string) {
-    error.classList.remove('hidden')
+    error.classList.remove('hidden');
     error.querySelector('.error__message').textContent = string;
-}
+};
 
 /* Функция удаления ошибки при нажатии на "бургер" */
 function removeError() {
     error.classList.add('hidden');
-}
+};
 
 /* GET запрос для по ID */
 function loadInformFromId(id) {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', `https://neto-api.herokuapp.com/pic/${id}`)
+    xhr.open('GET', `https://neto-api.herokuapp.com/pic/${id}`);
     xhr.send();
 
     xhr.addEventListener('load', () => {
@@ -46,8 +46,8 @@ function loadInformFromId(id) {
         loadImage(newImage);
         /* WSS */
         wss(newImage.id);
-    })
-}
+    });
+};
 
 /* Выбор открывающегося меню - поделиться или комментирование */
 function choiceMenu() {
@@ -56,15 +56,15 @@ function choiceMenu() {
         reloadStatus('default');
         menu.querySelector('.share').click();
     } else {
-        reloadStatus('default')
+        reloadStatus('default');
         menu.querySelector('.comments').click();
-    }
-}
+    };
+};
 
 /* функция меняет ссылку в "поделится" */
 function changeUrlNew(id) {
     menu.querySelector('.menu__url').value = window.location.origin + `/index.html?${id}`;
-}
+};;
 
 /* функция добавляет в изображение src */
 function loadImage(obj) {
@@ -75,10 +75,10 @@ function loadImage(obj) {
         currentImage.dataset.load = 'load';
         currentImage.addEventListener('load', (event) => {
             if (wrap.querySelector('canvas')) wrap.querySelectorAll('canvas').forEach(canvas => canvas.remove());
-            createCanvas()
-        })
+            createCanvas();
+        });
     } else return
-}
+};
 
 /* Создаем изображение с маской */
 function createNewImageMask(url) {
@@ -96,9 +96,9 @@ function createNewImageMask(url) {
         wrap.querySelector('.image-mask').classList.remove('hidden');
         wrap.querySelector('.image-mask').addEventListener('load', (e) => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-        })
-    }
-}
+        });
+    };
+};
 
 /* Создаем канвас */
 function createCanvas() {
@@ -116,7 +116,7 @@ function createCanvas() {
         ctx.strokeStyle = currentColor;
         ctx.beginPath();
         ctx.moveTo(e.pageX - canvas.getBoundingClientRect().left, e.pageY - canvas.getBoundingClientRect().top);
-    }
+    };
 
     function draw(e) {
         if (isDrawing == true) {
@@ -124,23 +124,23 @@ function createCanvas() {
             var y = e.pageY - canvas.getBoundingClientRect().top;
             ctx.lineTo(x, y);
             ctx.stroke();
-        }
-    }
+        };
+    };
 
     function stopDrawing() {
         if (isDrawing) sendMaskState();
         isDrawing = false;
-    }
+    };
 
     function sendMaskState() {
         canvas.toBlob(function (blob) {
             connection.send(blob);
             if (statusFirstSend) {
                 statusFirstSend = false;
-                connection.close()
-            }
+                connection.close();
+            };
         });
-    }
+    };
 
     drawArea.addEventListener('mousedown', startDrawing);
     drawArea.addEventListener('mouseup', stopDrawing);
@@ -150,50 +150,50 @@ function createCanvas() {
 
 /* Открываем webSocket */
 function wss(id) {
-    changeUrlNew(id)
+    changeUrlNew(id);
     serverId = id;
     connection = new WebSocket(`wss://neto-api.herokuapp.com/pic/${id}`);
 
     connection.addEventListener('message', event => {
         if (JSON.parse(event.data).event === 'pic') {
             if (JSON.parse(event.data).pic.comments) {
-                const comments = JSON.parse(event.data).pic.comments
+                const comments = JSON.parse(event.data).pic.comments;
                 for (let key in comments) {
                     upgrateComment(comments[key])
-                }
+                };
                 wrap.querySelectorAll('.comments__marker-checkbox').forEach(elem => elem.checked = false);
-            }
+            };
             if (JSON.parse(event.data).pic.mask) {
-                createNewImageMask(JSON.parse(event.data).pic.mask)
+                createNewImageMask(JSON.parse(event.data).pic.mask);
             } else {
-                createNewImageMask()
-            }
+                createNewImageMask();
+            };
         }
         if (JSON.parse(event.data).event === 'mask') {
-            createNewImageMask(JSON.parse(event.data).url)
+            createNewImageMask(JSON.parse(event.data).url);
         }
         if (JSON.parse(event.data).event === 'comment') {
             wrap.querySelectorAll('.loader').forEach(elem => elem.classList.add('hidden'));
-            upgrateComment(JSON.parse(event.data).comment)
-        }
+            upgrateComment(JSON.parse(event.data).comment);
+        };
     });
 
     connection.addEventListener('close', event => {
-        wss(id)
-    })
-}
+        wss(id);
+    });
+};
 
 /* Создание Input для загрузки изображения + Загрузка Drag&Drop + POST запрос для загрузки на сервер */
 function updateFilesInfo(files) {
     if (files[0].type !== "image/png" && files[0].type !== "image/jpeg") {
-        showError('Неверный формат файла. Пожалуйста, выберите изображение в формате .jpg или .png.')
+        showError('Неверный формат файла. Пожалуйста, выберите изображение в формате .jpg или .png.');
         return
-    }
-    sendFile(files[0])
-}
+    };
+    sendFile(files[0]);
+};
 
 function sendFile(file) {
-    wrap.querySelectorAll('.comments__form').forEach(elem => elem.remove())
+    wrap.querySelectorAll('.comments__form').forEach(elem => elem.remove());
     const formData = new FormData();
 
     formData.append('title', file.name);
@@ -203,24 +203,24 @@ function sendFile(file) {
     xhr.open('POST', 'https://neto-api.herokuapp.com/pic', true);
 
     xhr.addEventListener('loadstart', (event) => {
-        removeError()
+        removeError();
         imageLoader.style.display = 'block';
-    })
+    });
 
     xhr.addEventListener('loadend', () => {
         if (xhr.status !== 200) {
-            showError('Проблемы с загрузкой изображения, попробуйте позже')
+            showError('Проблемы с загрузкой изображения, попробуйте позже');
         }
         imageLoader.style.display = 'none';
-    })
+    });
 
     xhr.addEventListener('load', (event) => {
         if (xhr.status === 200) {
             let newCurrentImage = JSON.parse(xhr.responseText);
-            loadInformFromId(newCurrentImage.id)
+            loadInformFromId(newCurrentImage.id);
             uploadStatus = true;
-        } else console.log('error')
-    })
+        } else console.log('error');
+    });
 
     xhr.send(formData);
 }
@@ -247,7 +247,7 @@ function createNewInput() {
     document.querySelector('.menu__item.mode.new').appendChild(newInput);
 }
 
-document.addEventListener('DOMContentLoaded', createNewInput)
+document.addEventListener('DOMContentLoaded', createNewInput);
 
 /* Drag&Drop изображения */
 function onFilesDrop(event) {
@@ -256,55 +256,55 @@ function onFilesDrop(event) {
     if (currentImage.dataset.load === 'load') {
         showError('Чтобы загрузить новое изображение, пожалуйста, вопсользуйтесь пунктом «Загрузить новое» в меню.');
         return;
-    }
+    };
     updateFilesInfo(files);
-}
+};
 
 wrap.addEventListener('drop', onFilesDrop);
 wrap.addEventListener('dragover', event => event.preventDefault());
 
 /* Изменение состояния приложения и меню */
 function reloadStatus(string) {
-    menu.querySelector('.burger').style.display = 'none'
-    wrap.dataset.state = string
+    menu.querySelector('.burger').style.display = 'none';
+    wrap.dataset.state = string;
     if (string === 'default') {
         menu.dataset.state = 'default';
         menu.querySelectorAll('[data-state]').forEach(item => item.dataset.state = '');
-    }
+    };
     if (string === 'initial') {
         menu.dataset.state = 'initial';
-        menu.querySelectorAll('[data-state]').forEach(item => item.dataset.state = '')
-    }
+        menu.querySelectorAll('[data-state]').forEach(item => item.dataset.state = '');
+    };
     if (string === 'selected') {
-        menu.querySelector('.burger').style.display = ''
-        menu.dataset.state = 'selected'
-    }
-}
+        menu.querySelector('.burger').style.display = '';
+        menu.dataset.state = 'selected';
+    };
+};
 
 /* Проверка наличия ранее загруженного изображения или наличия ID в ссылке*/
 function requestImageInfo() {
     const str = window.location.href;
     const regex = /\?(.*)/;
-    let id = str.match(regex)
+    let id = str.match(regex);
     if (id) {
         loadInformFromId(id[1]);
     } else if (sessionStorage.id) {
-        loadInformFromId(sessionStorage.id)
-        reloadStatus('default')
+        loadInformFromId(sessionStorage.id);
+        reloadStatus('default');
     } else {
-        reloadStatus('initial')
-    }
-}
+        reloadStatus('initial');
+    };
+};
 
-document.addEventListener('DOMContentLoaded', requestImageInfo)
+document.addEventListener('DOMContentLoaded', requestImageInfo);
 
 /* Проверка наличия прошлого состояния меню */
 function requestLastMenuPosition() {
     if (localStorage.x && localStorage.y) {
-        menu.style.setProperty('--menu-left', `${localStorage.x}px`)
-        menu.style.setProperty('--menu-top', `${localStorage.y}px`)
-    } else return
-}
+        menu.style.setProperty('--menu-left', `${localStorage.x}px`);
+        menu.style.setProperty('--menu-top', `${localStorage.y}px`);
+    } else return;
+};
 
 document.addEventListener('DOMContentLoaded', requestLastMenuPosition)
 
@@ -320,23 +320,23 @@ menu.addEventListener('click', event => {
         modeToggle = menu.querySelectorAll('.menu__toggle');
 
     if (event.target === burgerMenu || event.target.parentNode === burgerMenu) {
-        reloadStatus('default')
-    }
+        reloadStatus('default');
+    };
     if (event.target === modeComments || event.target.parentNode === modeComments) {
         modeMenuAll.forEach(item => item.dataset.state = " ");
         modeComments.dataset.state = 'selected';
-        reloadStatus('selected')
-    }
+        reloadStatus('selected');
+    };
     if (event.target === modeDraw || event.target.parentNode === modeDraw) {
         modeMenuAll.forEach(item => item.dataset.state = " ");
         modeDraw.dataset.state = 'selected';
-        reloadStatus('selected')
-    }
+        reloadStatus('selected');
+    };
     if (event.target === modeShare || event.target.parentNode === modeShare) {
         modeMenuAll.forEach(item => item.dataset.state = " ");
         modeShare.dataset.state = 'selected';
-        reloadStatus('selected')
-    }
+        reloadStatus('selected');
+    };
     if (event.target === modeCopy) {
         menu.querySelector('.menu__url').select();
         try {
@@ -345,21 +345,21 @@ menu.addEventListener('click', event => {
             console.log(`URL ${msg} скопирован`);
         } catch (err) {
             console.log('Ошибка копирования');
-        }
+        };
         window.getSelection().removeAllRanges();
-    }
+    };
     if (event.target === modeToggle[0] || event.target === modeToggle[1]) {
         if (event.target.value === 'off') {
-            modeCommentsAll.forEach(elem => elem.classList.add('hidden'))
-        }
+            modeCommentsAll.forEach(elem => elem.classList.add('hidden'));
+        };
         if (event.target.value === 'on') {
-            modeCommentsAll.forEach(elem => elem.classList.remove('hidden'))
-        }
-    }
+            modeCommentsAll.forEach(elem => elem.classList.remove('hidden'));
+        };
+    };
     if (event.target.classList.contains('menu__color')) {
         menu.querySelectorAll('.menu__color').forEach(elem => {
-            if (elem.hasAttribute('checked')) elem.removeAttribute('checked')
-        })
+            if (elem.hasAttribute('checked')) elem.removeAttribute('checked');
+        });
         event.target.setAttribute('checked', 'checked');
         switch (event.target.value) {
             case 'red':
@@ -380,68 +380,67 @@ menu.addEventListener('click', event => {
             default:
                 currentColor = '#6ebf44'
                 break;
-        }
-    }
+        };
+    };
     if (!error.classList.contains('hidden')) removeError();
-    checkMenuBody(event.currentTarget, event.currentTarget.getBoundingClientRect().left)
-})
+    checkMenuBody(event.currentTarget, event.currentTarget.getBoundingClientRect().left);
+});
 
 /* Проверка меню на состояние */
 function checkMenuBody(block, x) {
     if (block.offsetHeight > menuSize) {
-        x--
-        menu.style.setProperty('--menu-left', x + 'px')
-        checkMenuBody(block, x)
-    } else return
-}
+        x--;
+        menu.style.setProperty('--menu-left', x + 'px');
+        checkMenuBody(block, x);
+    } else return;
+};
 
 /* Перетаскивание меню */
 menu.firstElementChild.addEventListener('mousedown', event => {
     dragMenu = event.currentTarget;
-})
+});
 
 document.addEventListener('mousemove', event => {
-    event.preventDefault()
+    event.preventDefault();
     if (dragMenu) {
         if (event.pageX < 0 + dragMenu.offsetWidth) {
-            menu.style.setProperty('--menu-left', 0 + 'px')
+            menu.style.setProperty('--menu-left', 0 + 'px');
             localStorage.x = 0;
         } else if (event.pageX + menu.offsetWidth > document.documentElement.clientWidth - dragMenu.offsetWidth - 1) {
-            menu.style.setProperty('--menu-left', document.documentElement.clientWidth - menu.offsetWidth - 1 + 'px')
+            menu.style.setProperty('--menu-left', document.documentElement.clientWidth - menu.offsetWidth - 1 + 'px');
             localStorage.x = document.documentElement.clientWidth - menu.offsetWidth - 1;
         } else {
-            menu.style.setProperty('--menu-left', event.pageX - (dragMenu.offsetWidth / 2) + 'px')
+            menu.style.setProperty('--menu-left', event.pageX - (dragMenu.offsetWidth / 2) + 'px');
             localStorage.x = event.pageX - (dragMenu.offsetWidth / 2);
-        }
+        };
         if (event.pageY < 0 + dragMenu.offsetHeight) {
-            menu.style.setProperty('--menu-top', 0 + 'px')
+            menu.style.setProperty('--menu-top', 0 + 'px');
             localStorage.y = 0;
         } else if (event.pageY + (menu.offsetHeight / 2) > document.documentElement.clientHeight - (dragMenu.offsetHeight / 2)) {
-            menu.style.setProperty('--menu-top', document.documentElement.clientHeight - dragMenu.offsetHeight + 'px')
+            menu.style.setProperty('--menu-top', document.documentElement.clientHeight - dragMenu.offsetHeight + 'px');
             localStorage.y = document.documentElement.clientHeight - dragMenu.offsetHeight;
         } else {
-            menu.style.setProperty('--menu-top', event.pageY - (dragMenu.offsetHeight / 2) + 'px')
+            menu.style.setProperty('--menu-top', event.pageY - (dragMenu.offsetHeight / 2) + 'px');
             localStorage.y = event.pageY - (dragMenu.offsetHeight / 2);
-        }
-    }
-})
+        };
+    };
+});
 
 document.addEventListener('mouseup', event => {
     dragMenu = null;
-})
+});
 
 /* Обработчик клика по холсту для создания комментария */
 wrap.addEventListener('click', (e) => {
     if (e.target === wrap.querySelector('canvas') && menu.querySelector('.menu__item.mode.comments').dataset.state === 'selected') {
-
         if (wrap.querySelector('[data-comment-id]')) {
             wrap.querySelectorAll('[data-comment-id]').forEach(elem => {
-                if (!elem.querySelector('p')) elem.remove()
-            })
+                if (!elem.querySelector('p')) elem.remove();
+            });
             addNewFormComment(e.pageX, e.pageY);
-        } else addNewFormComment(e.pageX, e.pageY)
-    }
-})
+        } else addNewFormComment(e.pageX, e.pageY);
+    };
+});
 
 /* Проверка комментариев */
 function upgrateComment(obj) {
@@ -451,8 +450,8 @@ function upgrateComment(obj) {
     } else {
         addNewFormComment(obj.left, obj.top);
         upgrateComment(obj);
-    }
-}
+    };
+};
 
 /* Создание новвой формы комментариев */
 function addNewFormComment(x, y) {
@@ -491,13 +490,13 @@ function addNewFormComment(x, y) {
 
     const loader = document.createElement('div');
     loader.classList.add('loader');
-    loader.classList.add('hidden')
+    loader.classList.add('hidden');
     commentBox.appendChild(loader);
 
     for (let i = 0; i < 5; i++) {
         const loadSpan = document.createElement('span');
         loader.appendChild(loadSpan);
-    }
+    };
 
     const textArea = document.createElement('textarea');
     textArea.classList.add('comments__input');
@@ -520,14 +519,14 @@ function addNewFormComment(x, y) {
     form.addEventListener('click', (e) => {
         if (event.target.classList.contains('comments__close') && event.currentTarget.querySelector('p')) {
             event.currentTarget.querySelector('.comments__marker-checkbox').checked = false;
-        }
+        };
         if (event.target.classList.contains('comments__close') && !event.currentTarget.querySelector('p')) {
             event.currentTarget.remove();
-        }
-    })
+        };
+    });
 
-    wrap.appendChild(form)
-}
+    wrap.appendChild(form);
+};
 
 /* Создание нового блока комментариев */
 function addNewComment(text, time, cont) {
@@ -545,15 +544,15 @@ function addNewComment(text, time, cont) {
     newMessage.innerText = text;
     comment.appendChild(newMessage);
 
-    cont.querySelector('.comments__body').insertBefore(cont.querySelector('.comments__body').appendChild(comment), cont.querySelector('.loader').parentNode)
-}
+    cont.querySelector('.comments__body').insertBefore(cont.querySelector('.comments__body').appendChild(comment), cont.querySelector('.loader').parentNode);
+};
 
 /* Формат даты */
 function formatData(data) {
     if (data < 10) {
         return '0' + data;
     } else return data;
-}
+};
 
 function sendMessage(event) {
     if (event) {
@@ -565,7 +564,7 @@ function sendMessage(event) {
     else return;
     event.target.querySelector('.loader').classList.remove('hidden');
     event.target.querySelector('.comments__input').value = '';
-}
+};
 
 function sendMessageForm(form) {
     fetch(`https://neto-api.herokuapp.com/pic/${serverId}/comments`, {
@@ -583,17 +582,17 @@ function sendMessageForm(form) {
         })
         .then(res => res.json())
         .catch(er => {
-            console.log(er)
+            console.log(er);
         });
-}
+};
 
 /* Изменение положения комментариев при изменении размера окна браузера */
 window.addEventListener('resize', (e) => {
-    let formComment = wrap.querySelector('.comments__form')
+    let formComment = wrap.querySelector('.comments__form');
     if (formComment) {
         let formComments = wrap.querySelectorAll('.comments__form');
         formComments.forEach(form => {
-            form.style.left = `${form.dataset.left - ((clientWidth - document.documentElement.clientWidth) / 2)}px`
-        })
-    }
-})
+            form.style.left = `${form.dataset.left - ((clientWidth - document.documentElement.clientWidth) / 2)}px`;
+        });
+    };
+});
