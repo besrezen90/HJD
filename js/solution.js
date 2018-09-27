@@ -25,12 +25,12 @@ let dragMenu = null, // Переменная для перетаскивания
 function showError(string) {
     error.classList.remove('hidden');
     error.querySelector('.error__message').textContent = string;
-};
+}
 
 /* Функция удаления ошибки при нажатии на "бургер" */
 function removeError() {
     error.classList.add('hidden');
-};
+}
 
 /* GET запрос для по ID */
 function loadInformFromId(id) {
@@ -47,7 +47,7 @@ function loadInformFromId(id) {
         /* WSS */
         wss(newImage.id);
     });
-};
+}
 
 /* Выбор открывающегося меню - поделиться или комментирование */
 function choiceMenu() {
@@ -58,13 +58,13 @@ function choiceMenu() {
     } else {
         reloadStatus('default');
         menu.querySelector('.comments').click();
-    };
-};
+    }
+}
 
 /* функция меняет ссылку в "поделится" */
 function changeUrlNew(id) {
     menu.querySelector('.menu__url').value = window.location.origin + `/index.html?${id}`;
-};;
+}
 
 /* функция добавляет в изображение src */
 function loadImage(obj) {
@@ -77,8 +77,8 @@ function loadImage(obj) {
             if (wrap.querySelector('canvas')) wrap.querySelectorAll('canvas').forEach(canvas => canvas.remove());
             createCanvas();
         });
-    } else return
-};
+    } else return;
+}
 
 /* Создаем изображение с маской */
 function createNewImageMask(url) {
@@ -97,8 +97,8 @@ function createNewImageMask(url) {
         wrap.querySelector('.image-mask').addEventListener('load', (e) => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         });
-    };
-};
+    }
+}
 
 /* Создаем канвас */
 function createCanvas() {
@@ -116,7 +116,7 @@ function createCanvas() {
         ctx.strokeStyle = currentColor;
         ctx.beginPath();
         ctx.moveTo(e.pageX - canvas.getBoundingClientRect().left, e.pageY - canvas.getBoundingClientRect().top);
-    };
+    }
 
     function draw(e) {
         if (isDrawing == true) {
@@ -124,13 +124,13 @@ function createCanvas() {
             var y = e.pageY - canvas.getBoundingClientRect().top;
             ctx.lineTo(x, y);
             ctx.stroke();
-        };
-    };
+        }
+    }
 
     function stopDrawing() {
         if (isDrawing) sendMaskState();
         isDrawing = false;
-    };
+    }
 
     function sendMaskState() {
         canvas.toBlob(function (blob) {
@@ -138,9 +138,9 @@ function createCanvas() {
             if (statusFirstSend) {
                 statusFirstSend = false;
                 connection.close();
-            };
+            }
         });
-    };
+    }
 
     drawArea.addEventListener('mousedown', startDrawing);
     drawArea.addEventListener('mouseup', stopDrawing);
@@ -159,15 +159,15 @@ function wss(id) {
             if (JSON.parse(event.data).pic.comments) {
                 const comments = JSON.parse(event.data).pic.comments;
                 for (let key in comments) {
-                    upgrateComment(comments[key])
-                };
+                    upgrateComment(comments[key]);
+                }
                 wrap.querySelectorAll('.comments__marker-checkbox').forEach(elem => elem.checked = false);
-            };
+            }
             if (JSON.parse(event.data).pic.mask) {
                 createNewImageMask(JSON.parse(event.data).pic.mask);
             } else {
                 createNewImageMask();
-            };
+            }
         }
         if (JSON.parse(event.data).event === 'mask') {
             createNewImageMask(JSON.parse(event.data).url);
@@ -175,22 +175,22 @@ function wss(id) {
         if (JSON.parse(event.data).event === 'comment') {
             wrap.querySelectorAll('.loader').forEach(elem => elem.classList.add('hidden'));
             upgrateComment(JSON.parse(event.data).comment);
-        };
+        }
     });
 
     connection.addEventListener('close', event => {
         wss(id);
     });
-};
+}
 
 /* Создание Input для загрузки изображения + Загрузка Drag&Drop + POST запрос для загрузки на сервер */
 function updateFilesInfo(files) {
     if (files[0].type !== "image/png" && files[0].type !== "image/jpeg") {
         showError('Неверный формат файла. Пожалуйста, выберите изображение в формате .jpg или .png.');
-        return
-    };
+        return;
+    }
     sendFile(files[0]);
-};
+}
 
 function sendFile(file) {
     wrap.querySelectorAll('.comments__form').forEach(elem => elem.remove());
@@ -256,9 +256,9 @@ function onFilesDrop(event) {
     if (currentImage.dataset.load === 'load') {
         showError('Чтобы загрузить новое изображение, пожалуйста, вопсользуйтесь пунктом «Загрузить новое» в меню.');
         return;
-    };
+    }
     updateFilesInfo(files);
-};
+}
 
 wrap.addEventListener('drop', onFilesDrop);
 wrap.addEventListener('dragover', event => event.preventDefault());
@@ -270,16 +270,16 @@ function reloadStatus(string) {
     if (string === 'default') {
         menu.dataset.state = 'default';
         menu.querySelectorAll('[data-state]').forEach(item => item.dataset.state = '');
-    };
+    }
     if (string === 'initial') {
         menu.dataset.state = 'initial';
         menu.querySelectorAll('[data-state]').forEach(item => item.dataset.state = '');
-    };
+    }
     if (string === 'selected') {
         menu.querySelector('.burger').style.display = '';
         menu.dataset.state = 'selected';
-    };
-};
+    }
+}
 
 /* Проверка наличия ранее загруженного изображения или наличия ID в ссылке*/
 function requestImageInfo() {
@@ -293,8 +293,8 @@ function requestImageInfo() {
         reloadStatus('default');
     } else {
         reloadStatus('initial');
-    };
-};
+    }
+}
 
 document.addEventListener('DOMContentLoaded', requestImageInfo);
 
@@ -304,9 +304,9 @@ function requestLastMenuPosition() {
         menu.style.setProperty('--menu-left', `${localStorage.x}px`);
         menu.style.setProperty('--menu-top', `${localStorage.y}px`);
     } else return;
-};
+}
 
-document.addEventListener('DOMContentLoaded', requestLastMenuPosition)
+document.addEventListener('DOMContentLoaded', requestLastMenuPosition);
 
 /* Обработчик клика по меню */
 menu.addEventListener('click', event => {
@@ -321,22 +321,22 @@ menu.addEventListener('click', event => {
 
     if (event.target === burgerMenu || event.target.parentNode === burgerMenu) {
         reloadStatus('default');
-    };
+    }
     if (event.target === modeComments || event.target.parentNode === modeComments) {
         modeMenuAll.forEach(item => item.dataset.state = " ");
         modeComments.dataset.state = 'selected';
         reloadStatus('selected');
-    };
+    }
     if (event.target === modeDraw || event.target.parentNode === modeDraw) {
         modeMenuAll.forEach(item => item.dataset.state = " ");
         modeDraw.dataset.state = 'selected';
         reloadStatus('selected');
-    };
+    }
     if (event.target === modeShare || event.target.parentNode === modeShare) {
         modeMenuAll.forEach(item => item.dataset.state = " ");
         modeShare.dataset.state = 'selected';
         reloadStatus('selected');
-    };
+    }
     if (event.target === modeCopy) {
         menu.querySelector('.menu__url').select();
         try {
@@ -345,17 +345,17 @@ menu.addEventListener('click', event => {
             console.log(`URL ${msg} скопирован`);
         } catch (err) {
             console.log('Ошибка копирования');
-        };
+        }
         window.getSelection().removeAllRanges();
-    };
+    }
     if (event.target === modeToggle[0] || event.target === modeToggle[1]) {
         if (event.target.value === 'off') {
             modeCommentsAll.forEach(elem => elem.classList.add('hidden'));
-        };
+        }
         if (event.target.value === 'on') {
             modeCommentsAll.forEach(elem => elem.classList.remove('hidden'));
-        };
-    };
+        }
+    }
     if (event.target.classList.contains('menu__color')) {
         menu.querySelectorAll('.menu__color').forEach(elem => {
             if (elem.hasAttribute('checked')) elem.removeAttribute('checked');
@@ -363,25 +363,25 @@ menu.addEventListener('click', event => {
         event.target.setAttribute('checked', 'checked');
         switch (event.target.value) {
             case 'red':
-                currentColor = '#eb5d56'
+                currentColor = '#eb5d56';
                 break;
             case 'yellow':
-                currentColor = '#f4d22f'
+                currentColor = '#f4d22f';
                 break;
             case 'green':
-                currentColor = '#6ebf44'
+                currentColor = '#6ebf44';
                 break;
             case 'blue':
-                currentColor = '#52a7f7'
+                currentColor = '#52a7f7';
                 break;
             case 'purple':
-                currentColor = '#b36ae0'
+                currentColor = '#b36ae0';
                 break;
             default:
-                currentColor = '#6ebf44'
+                currentColor = '#6ebf44';
                 break;
-        };
-    };
+        }
+    }
     if (!error.classList.contains('hidden')) removeError();
     checkMenuBody(event.currentTarget, event.currentTarget.getBoundingClientRect().left);
 });
@@ -393,7 +393,7 @@ function checkMenuBody(block, x) {
         menu.style.setProperty('--menu-left', x + 'px');
         checkMenuBody(block, x);
     } else return;
-};
+}
 
 /* Перетаскивание меню */
 menu.firstElementChild.addEventListener('mousedown', event => {
@@ -412,7 +412,7 @@ document.addEventListener('mousemove', event => {
         } else {
             menu.style.setProperty('--menu-left', event.pageX - (dragMenu.offsetWidth / 2) + 'px');
             localStorage.x = event.pageX - (dragMenu.offsetWidth / 2);
-        };
+        }
         if (event.pageY < 0 + dragMenu.offsetHeight) {
             menu.style.setProperty('--menu-top', 0 + 'px');
             localStorage.y = 0;
@@ -422,8 +422,8 @@ document.addEventListener('mousemove', event => {
         } else {
             menu.style.setProperty('--menu-top', event.pageY - (dragMenu.offsetHeight / 2) + 'px');
             localStorage.y = event.pageY - (dragMenu.offsetHeight / 2);
-        };
-    };
+        }
+    }
 });
 
 document.addEventListener('mouseup', event => {
@@ -439,7 +439,7 @@ wrap.addEventListener('click', (e) => {
             });
             addNewFormComment(e.pageX, e.pageY);
         } else addNewFormComment(e.pageX, e.pageY);
-    };
+    }
 });
 
 /* Проверка комментариев */
@@ -450,8 +450,8 @@ function upgrateComment(obj) {
     } else {
         addNewFormComment(obj.left, obj.top);
         upgrateComment(obj);
-    };
-};
+    }
+}
 
 /* Создание новвой формы комментариев */
 function addNewFormComment(x, y) {
@@ -496,7 +496,7 @@ function addNewFormComment(x, y) {
     for (let i = 0; i < 5; i++) {
         const loadSpan = document.createElement('span');
         loader.appendChild(loadSpan);
-    };
+    }
 
     const textArea = document.createElement('textarea');
     textArea.classList.add('comments__input');
@@ -519,14 +519,14 @@ function addNewFormComment(x, y) {
     form.addEventListener('click', (e) => {
         if (event.target.classList.contains('comments__close') && event.currentTarget.querySelector('p')) {
             event.currentTarget.querySelector('.comments__marker-checkbox').checked = false;
-        };
+        }
         if (event.target.classList.contains('comments__close') && !event.currentTarget.querySelector('p')) {
             event.currentTarget.remove();
-        };
+        }
     });
 
     wrap.appendChild(form);
-};
+}
 
 /* Создание нового блока комментариев */
 function addNewComment(text, time, cont) {
@@ -545,14 +545,14 @@ function addNewComment(text, time, cont) {
     comment.appendChild(newMessage);
 
     cont.querySelector('.comments__body').insertBefore(cont.querySelector('.comments__body').appendChild(comment), cont.querySelector('.loader').parentNode);
-};
+}
 
 /* Формат даты */
 function formatData(data) {
     if (data < 10) {
         return '0' + data;
     } else return data;
-};
+}
 
 function sendMessage(event) {
     if (event) {
@@ -564,7 +564,7 @@ function sendMessage(event) {
     else return;
     event.target.querySelector('.loader').classList.remove('hidden');
     event.target.querySelector('.comments__input').value = '';
-};
+}
 
 function sendMessageForm(form) {
     fetch(`https://neto-api.herokuapp.com/pic/${serverId}/comments`, {
@@ -584,7 +584,7 @@ function sendMessageForm(form) {
         .catch(er => {
             console.log(er);
         });
-};
+}
 
 /* Изменение положения комментариев при изменении размера окна браузера */
 window.addEventListener('resize', (e) => {
@@ -594,5 +594,5 @@ window.addEventListener('resize', (e) => {
         formComments.forEach(form => {
             form.style.left = `${form.dataset.left - ((clientWidth - document.documentElement.clientWidth) / 2)}px`;
         });
-    };
+    }
 });
